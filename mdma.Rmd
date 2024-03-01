@@ -11,4 +11,86 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Economical risk project
 
-ciao
+# SETUP MAC
+```{r}
+setwd("~/Desktop/Economical-risk-project")
+```
+
+# SETUP WINDOWS
+```{r}
+# Qui dovete mettere il vostro path
+setwd("~\Desktop\Economical-risk-project")
+```
+
+## carico Tidyverse
+```{r}
+library(tidyverse)
+```
+
+## Caricamento dei dataset - MAC
+```{r}
+carcom = read.csv("indagine_2020/carcom20.csv")
+debiti =  read.csv("indagine_2020/debiti20.csv")
+
+# Carico gli allegati
+debiti_residenza = read.csv("indagine_2020/alld2_res.csv")
+debiti_professione = read.csv("indagine_2020/alld2_prof.csv")
+debiti_famiglia = read.csv("indagine_2020/alld2_fam.csv")
+debiti_altri_immobili = read.csv("indagine_2020/alld2_aimm.csv")
+```
+
+## Caricamento dei dataset - WINDOWS
+```{r}
+
+carcom = read.csv("indagine_2020\carcom20.csv")
+debiti =  read.csv("indagine_2020\debiti20.csv")
+
+# Carico gli allegati
+debiti_residenza = read.csv("indagine_2020\alld2_res.csv")
+debiti_professione = read.csv("indagine_2020\alld2_prof.csv")
+debiti_famiglia = read.csv("indagine_2020\alld2_fam.csv")
+debiti_altri_immobili = read.csv("indagine_2020\alld2_aimm.csv")
+```
+
+
+## Pulizia dei dataset
+### Carcom
+Teniamo solo le variabili che ci servono
+```{r}
+carcom = carcom %>% select(NQUEST, nord, NCOMP, SEX, ANASC, ETA, CLETA5, PERL, PERC, NPERL, NPERC, Q, QUAL, SETT, AREA5, IREG, ACOM4C)
+
+
+carcom = carcom %>% rename("classe_eta" = CLETA5)
+carcom = carcom %>% rename("anno_nascita" = ANASC)
+carcom = carcom %>% rename("numero_componenti" = NCOMP)
+carcom = carcom %>% rename("status_lavoratore" = Q)
+carcom = carcom %>% rename("qualifica_lavoratore" = QUAL)
+carcom = carcom %>% rename("settore" = SETT)
+carcom = carcom %>% rename("area_geografica" = AREA5)
+carcom = carcom %>% rename("regione_residenza" = IREG)
+carcom = carcom %>% rename("ampiezza_comune" = ACOM4C)
+```
+
+
+### Debiti
+Pulizia dataset debiti
+```{r}
+debiti = debiti %>% rename("tot_rate_pagate" = RATADEB)
+debiti = debiti %>% rename("tot_rate_res" = RATADEB_RES)
+debiti = debiti %>% rename("tot_rate_altri_immobili" = RATADEB_AIMM)
+debiti = debiti %>% rename("tot_rate_fam" = RATADEB_FAM)
+debiti = debiti %>% rename("tot_rate_professione" = RATADEB_PROF)
+debiti = debiti %>% rename("deb_res_immobili" = PFIMM)
+debiti = debiti %>% rename("deb_res_beni_consumo" = PFCONS)
+debiti = debiti %>% rename("deb_res_mezzi_trasporto" = TDEBITC)
+debiti = debiti %>% rename("deb_res_beni_durevoli" = TDEBITD)
+debiti = debiti %>% rename("deb_res_beni_non_durevoli" = TDEBITE)
+debiti = debiti %>% rename("deb_res_altro" = TDEBITF)
+debiti = debiti %>% rename("deb_res_istruzione" = TDEBITG)
+debiti = debiti %>% rename("deb_res_professione" = PFAZ)
+debiti = debiti %>% rename("deb_carte_credito" = PFCARTE)
+debiti = debiti %>% rename("deb_scoperto_cc" = PFCC)
+debiti = debiti %>% rename("deb_garanzie_reali" = PFCOLL)
+debiti = debiti %>% rename("deb_no_garanzie_reali" = PFNOCOLL)
+```
+
