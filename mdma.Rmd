@@ -61,14 +61,27 @@ carcom = carcom %>% select(NQUEST, nord, NCOMP, SEX, ANASC, ETA, CLETA5, PERL, P
 
 
 carcom = carcom %>% rename("classe_eta" = CLETA5)
+carcom$classe_eta = as.factor(carcom$classe_eta)
+
 carcom = carcom %>% rename("anno_nascita" = ANASC)
 carcom = carcom %>% rename("numero_componenti" = NCOMP)
 carcom = carcom %>% rename("status_lavoratore" = Q)
+carcom$status_lavoratore = as.factor(carcom$status_lavoratore)
+
 carcom = carcom %>% rename("qualifica_lavoratore" = QUAL)
+carcom$qualifica_lavoratore = as.factor(carcom$qualifica_lavoratore)
+
 carcom = carcom %>% rename("settore" = SETT)
+carcom$settore = as.factor(carcom$settore)
+
 carcom = carcom %>% rename("area_geografica" = AREA5)
+carcom$area_geografica = as.factor(carcom$area_geografica)
+
 carcom = carcom %>% rename("regione_residenza" = IREG)
+carcom$regione_residenza = as.factor(carcom$regione_residenza)
+
 carcom = carcom %>% rename("ampiezza_comune" = ACOM4C)
+carcom$ampiezza_comune = as.factor(carcom$ampiezza_comune)
 ```
 
 
@@ -92,5 +105,91 @@ debiti = debiti %>% rename("deb_carte_credito" = PFCARTE)
 debiti = debiti %>% rename("deb_scoperto_cc" = PFCC)
 debiti = debiti %>% rename("deb_garanzie_reali" = PFCOLL)
 debiti = debiti %>% rename("deb_no_garanzie_reali" = PFNOCOLL)
+
+
+# Setto a 0 i dati NA
+debiti = replace(debiti, is.na(debiti), 0)
 ```
+
+
+# Analisi dati
+
+Aggiungo una colonna chiamata "Totale debito" che è la somma di: 
+  - Debito residuo per gli immobili 
+  - "" per beni di consumo
+  - "" della professione
+  - "" delle carte di credito
+  - "" dello scoperto di conto corrente
+```{r}
+
+debiti = debiti %>% mutate(tot_debito = deb_res_immobili + deb_res_beni_consumo + deb_res_professione + deb_carte_credito + deb_scoperto_cc)
+
+print(paste("Debito totale famiglie italiane 2020 nel campione: ", sum(debiti$tot_debito)))
+```
+
+```{r}
+famiglie_con_debito = debiti %>% filter(debiti$tot_debito > 0)
+
+print(paste("Percentuale di famiglie con debiti:", nrow(famiglie_con_debito)/nrow(debiti) * 100))
+```
+
+Ora analizziamo com'è distribuito il debito tra le famiglie che sono indebitate
+
+```{r}
+summary(famiglie_con_debito$tot_debito)
+```
+
+```{r}
+ggplot(famiglie_con_debito) +
+  geom_histogram(aes(x = tot_debito))
+```
+```{r}
+# Questo penso sia inutile
+ggplot(famiglie_con_debito) +
+  geom_boxplot(aes(x = tot_debito))
+```
+
+
+
+```{r}
+ggplot(debiti) +
+  geom_histogram(aes(x = tot_debito))
+```
+# Analisi sul debito e variabili sociodemografiche
+
+In primis ci salviamo da carcom solo le variabili utili per essere analizzate col debito,
+ed eliminiamo i doppioni 
+
+```{r}
+carcom_per_debito = carcom %>% select(NQUEST, numero_componenti, area_geografica, regione_residenza, ampiezza_comune)
+
+# ora elimino i duplicati dal dataframe
+carcom_per_debito = distinct(carcom_per_debito)
+```
+
+Ora creo il dataframe facendo il join tra i carcom senza duplicati e debiti
+```{r}
+debiti_full = merge(carcom_per_debito, debiti, by="NQUEST")
+
+head(debiti_full)
+```
+
+Proviamo a fare un analisi sul debito per area geografica
+```{r}
+debiti_full %>% filter(tot_debito > 0) %>% group_by(area_geografica) %>% summarize(mean = mean(tot_debito), median = median(tot_debito), sd = sd(tot_debito)) %>% arrange(desc(mean))
+```
+
+Proviamo a fare un analisi sul debito per regione di residenza
+```{r}
+debiti_full %>% filter(tot_debito > 0) %>% group_by(regione_residenza) %>% summarize(mean = mean(tot_debito), median = median(tot_debito), sd = sd(tot_debito)) %>% arrange(desc(mean))
+```
+
+Proviamo a fare un analisi sul debito per ampiezza del comune di residenza
+```{r}
+debiti_full %>% filter(tot_debito > 0) %>% group_by(ampiezza_comune) %>% summarize(mean = mean(tot_debito), median = median(tot_debito), sd = sd(tot_debito)) %>% arrange(desc(mean))
+```
+
+
+
+
 
