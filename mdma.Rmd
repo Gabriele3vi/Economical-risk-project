@@ -19,7 +19,7 @@ setwd("~/Desktop/Economical-risk-project")
 # SETUP WINDOWS
 ```{r}
 # Qui dovete mettere il vostro path
-setwd("~\Desktop\Economical-risk-project")
+# setwd("~\Desktop\Economical-risk-project")
 ```
 
 ## carico Tidyverse
@@ -38,6 +38,7 @@ debiti_professione = read.csv("indagine_2020/alld2_prof.csv")
 debiti_famiglia = read.csv("indagine_2020/alld2_fam.csv")
 debiti_altri_immobili = read.csv("indagine_2020/alld2_aimm.csv")
 ```
+
 
 ## Caricamento dei dataset - WINDOWS
 ```{r}
@@ -190,6 +191,240 @@ debiti_full %>% filter(tot_debito > 0) %>% group_by(ampiezza_comune) %>% summari
 ```
 
 
+# ANALISI COMPONENTI DEL DEBITO RESIDUO
+
+## PFIMM
+
+= indica il debito residuo per acquisto/ristrutturazione immobili
+
+Quante households hanno ancora debito residuo per acquisto/ristrutturazione immobili?
+
+```{r}
+tot_fam_NO_PFIMM = sum(debiti$deb_res_immobili == 0)
+cat('Il totale delle households senza PFIMM è: ', tot_fam_NO_PFIMM, '\n')
+
+tot_fam_PFIMM = sum(debiti$deb_res_immobili > 0)
+cat('Il totale delle households con PFIMM è: ', tot_fam_PFIMM, '\n')
+
+cat('La percentuale di households che nel 2020 presentano debito residuo per acquisto/ristrutturazione immobili è: ', (tot_fam_PFIMM/(tot_fam_NO_PFIMM+tot_fam_PFIMM))*100,'%', '\n')
+```
+
+Delle households con PFIMM, presentiamo un riassunto statistico di media, mediana, quartili, valore minimo, valore massimo:
+```{r}
+pfimm = debiti %>% select(deb_res_immobili) %>% filter(deb_res_immobili != 0) 
+summary(pfimm)
+```
+Guardiamo la distribuzione di questi valori attraverso l'utilizzo di un'istogramma:
+
+```{r}
+library(ggplot2)
+
+ggplot(pfimm, aes(x = deb_res_immobili)) +geom_histogram(bins = 60) + geom_vline(xintercept = median(pfimm$deb_res_immobili), color = 'red') + geom_vline(xintercept = mean(pfimm$deb_res_immobili), color = 'green')
+```
+Possiamo vedere come la distribuzione dei valori del debito residuo per acquisto/ristrutturazione immobili non sia normale, ma right-skewed, dal momento che la media ha un valore superiore della mediana.
+
+Ora possiamo anche utilizzare un boxplot per avere una situazione più chiara:
+
+```{r}
+# UTILE?
+
+ggplot(pfimm, aes(x = pfimm$deb_res_immobili)) +
+  geom_boxplot()
+```
+
+### Analisi sul debito e variabili sociodemografiche
+
+In primis ci salviamo da carcom solo le variabili utili per essere analizzate col debito, ed eliminiamo i doppioni:
+
+```{r}
+carcom_per_debito = carcom %>% select(NQUEST, numero_componenti, area_geografica, regione_residenza, ampiezza_comune)
+
+# ora elimino i duplicati dal dataframe
+carcom_per_debito = distinct(carcom_per_debito)
+```
+
+Ora creo il dataframe facendo il join tra i carcom senza duplicati e debiti:
+```{r}
+debiti_full = merge(carcom_per_debito, debiti, by="NQUEST")
+
+head(debiti_full)
+```
+
+In relazione a:
+
+### NUMERO COMPONENTI
+
+```{r}
+pfimm_n_componenti = debiti_full %>% filter(deb_res_immobili > 0) %>% group_by(numero_componenti) %>% summarize(mean = mean(deb_res_immobili), median = median(deb_res_immobili), sd = sd(deb_res_immobili)) %>% arrange()
+
+ggplot(pfimm_n_componenti, aes(x = numero_componenti, y = mean)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  labs(title = "Media del debito residuo per numero di componenti",
+       x = "Numero di componenti",
+       y = "Media del debito residuo") 
+
+# Perchè qua ho NA su sd?
+```
+
+### AREA GEOGRAFICA
+```{r}
+pfimm_area_geografica = debiti_full %>% filter(deb_res_immobili > 0) %>% group_by(area_geografica) %>% summarize(mean = mean(deb_res_immobili), median = median(deb_res_immobili), sd = sd(deb_res_immobili)) %>% arrange()
+pfimm_area_geografica
+```
+
+```{r}
+etichette_aree = c('Nord-Ovest', 'Nord-Est', 'Centro', 'Sud', 'Isole')
+ggplot(pfimm_area_geografica, aes(x = area_geografica, y = "", fill = mean)) +
+  geom_tile() +
+  scale_fill_gradient(low = "lightgreen", high = "darkgreen") +
+  scale_x_discrete(labels = etichette_aree)
+```
+
+### REGIONE DI RESIDENZA
+
+```{r}
+debiti_full %>% filter(deb_res_immobili > 0) %>% group_by(regione_residenza) %>% summarize(mean = mean(deb_res_immobili), median = median(deb_res_immobili), sd = sd(deb_res_immobili)) %>% arrange(desc(mean)) 
+```
+
+## PFAZ
+
+= indica il debito residuo per motivi professionali
+
+Quante households presentano debito residuo nel 2020?
+```{r}
+tot_fam_NO_PFAZ = sum(debiti$deb_res_professione == 0) 
+cat('Il totale delle households senza PFAZ è:', tot_fam_NO_PFAZ, '\n')
+
+tot_fam_PFAZ = sum(debiti$deb_res_professione > 0) 
+cat('Il totale delle households con PFAZ è:', tot_fam_PFAZ, '\n')
+
+cat('La percentuale di households che nel 2020 presentano debito residuo per motivi professionali è:', (tot_fam_PFAZ/(tot_fam_NO_PFAZ+tot_fam_PFAZ))*100,'%', '\n')
+```
+Delle households con PFAZ presentiamo un riassunto statistico di media, mediana, quartili, valore minimo, valore massimo:
+```{r}
+pfaz = debiti %>% select(deb_res_professione) %>% filter(deb_res_professione != 0) 
+summary(pfaz)
+```
+Guardiamo la distribuzione di questi valori attraverso l'utilizzo di un'istogramma:
+
+```{r}
+library(ggplot2)  
+ggplot(pfaz, aes(x = deb_res_professione)) +
+  geom_histogram(bins = 30) + 
+  geom_vline(xintercept = median(pfaz$deb_res_professione), color = 'red') +
+  geom_vline(xintercept = mean(pfaz$deb_res_professione), color = 'green') +
+  scale_x_log10()
+```
+
+### Analisi sul debito e variabili sociodemografiche
+In primis ci salviamo da carcom solo le variabili utili per essere analizzate col debito, ed eliminiamo i doppioni.
+
+```{r}
+carcom_pfaz = carcom %>% select(NQUEST, classe_eta, numero_componenti, PERL, NPERL, status_lavoratore, qualifica_lavoratore, settore, area_geografica)
+
+carcom_pfaz = distinct(carcom_pfaz)
+
+head(carcom_pfaz)
+```
+
+Ora facciamo il merge tra i due dataset
+
+```{r}
+debiti_pfaz = merge(carcom_pfaz,debiti, by = "NQUEST")
+```
 
 
+### STATUS LAVORATORE
+```{r}
+pfaz_status = debiti_pfaz %>% filter(deb_res_professione > 0) %>% group_by(status_lavoratore) %>% summarize(mean = mean(deb_res_professione), median = median(deb_res_professione), sd = sd(deb_res_professione)) %>% arrange()
+```
+
+```{r}
+etichette = c('1 - Employee', '2 - Self-employed', '3 - Non-Professional')
+colori = c('darkorange', 'darkred', 'darkblue')
+ggplot(pfaz_status, aes(x = status_lavoratore, y = mean)) +
+  geom_bar(stat = 'identity', fill = colori) +
+  scale_x_discrete(labels = etichette)
+```
+
+### QUALIFICA
+```{r}
+pfaz_qual = debiti_pfaz %>% filter(deb_res_professione > 0) %>% group_by(qualifica_lavoratore) %>% summarize(mean = mean(deb_res_professione), median = median(deb_res_professione), sd = sd(deb_res_professione)) %>% arrange() %>% mutate('Qualifica' = c('operaio', 'impiegato', 'dirigente', 'imprenditore/libero professionista', 'altro autonomo', 'pensionato', 'altro non occupato')) %>% select(Qualifica, everything())
+
+colori = c('lightgreen', 'lightblue', 'lightpink', 'yellow', 'darkorange', 'red', 'darkblue')
+pie(pfaz_qual$mean, labels = pfaz_qual$Qualifica, col = colori)
+```
+### SETTORE
+
+```{r}
+pfaz_sett = debiti_pfaz %>% filter(deb_res_professione > 0) %>% group_by(settore)%>% mutate(Settore = case_when(
+    settore == 1 ~ "Agricoltura",
+    settore == 2 ~ "Industria",
+    settore == 3 ~ "Servizi Pubblici",
+    settore == 4 ~ "Altri settori",
+    settore == 5 ~ "Nessun settore")) %>% select(Settore, everything())
+
+pfaz_sett_summarize = pfaz_sett %>% filter(deb_res_professione > 0) %>% group_by(settore) %>% summarize(mean = mean(deb_res_professione), median = median(deb_res_professione), sd = sd(deb_res_professione)) %>% arrange()
+
+ggplot(pfaz_sett, aes(x = Settore, y = deb_res_professione)) +
+  geom_boxplot() +
+  scale_y_log10()
+```
+
+### AREA GEOGRAFICA
+```{r}
+pfaz_area_geografica = debiti_pfaz %>% filter(deb_res_professione > 0) %>% group_by(area_geografica) %>% summarize(mean = mean(deb_res_professione), median = median(deb_res_professione), sd = sd(deb_res_professione)) %>% arrange()
+
+etichette_aree = c('Nord-Ovest', 'Nord-Est', 'Centro', 'Sud', 'Isole')
+ggplot(pfaz_area_geografica, aes(x = area_geografica, y = "", fill = mean)) +
+  geom_tile() +
+  scale_fill_gradient(low = "lightyellow", high = "darkorange") +
+  scale_x_discrete(labels = etichette_aree)
+```
+## PFCARTE
+= indica il debito su carte di credito
+
+Quante households presentano nel 2020 debito su carte di credito
+
+```{r}
+debiti$deb_carte_credito <- replace(debiti$deb_carte_credito, is.na(debiti$deb_carte_credito), 0)
+
+tot_fam_NO_PFCARTE = sum(debiti$deb_carte_credito == 0)
+cat('Il totale di household senza PFCARTE è: ', tot_fam_NO_PFCARTE, '\n')
+
+tot_fam_PFCARTE = sum(debiti$deb_carte_credito > 0)
+cat('Il totale di household con PFCARTE è: ', tot_fam_PFCARTE, '\n')
+
+cat('La percentuale di household con debito su carte di credito è: ', (tot_fam_PFCARTE/(tot_fam_NO_PFCARTE + tot_fam_PFCARTE))*100,'%', '\n')
+```
+```{r}
+#Ha senso fare un'analisi considerando le variabili di carcom dal momento che abbiamo 47 households con debito su carta di credito????
+```
+
+## PFCC
+= indica lo scoperto su conti correnti
+
+Quante households presentano nel 2020 scoperto su conti correnti?
+```{r}
+debiti$deb_scoperto_cc <- replace(debiti$deb_scoperto_cc, is.na(debiti$deb_scoperto_cc), 0)
+
+tot_fam_NO_PFCC = sum(debiti$deb_scoperto_cc == 0)
+cat('Il totale di household senza PFCC è: ', tot_fam_NO_PFCC, '\n')
+
+tot_fam_PFCC = sum(debiti$deb_scoperto_cc > 0)
+cat('Il totale di household con PFCC è: ', tot_fam_PFCC, '\n')
+
+cat('La percentuale di household con debito su carte di credito è: ', (tot_fam_PFCC/(tot_fam_NO_PFCC + tot_fam_PFCC))*100,'%', '\n')
+```
+Analizziamo la distribuzione dei dati attraverso un istogramma:
+
+```{r}
+deb_scoperto = debiti %>% filter(deb_scoperto_cc > 0) 
+ggplot(deb_scoperto, aes(x = deb_scoperto_cc)) +
+  geom_histogram(bins = 30) +
+  geom_vline(xintercept = mean(deb_scoperto$deb_scoperto_cc), color = 'green') +
+  geom_vline(xintercept = median(deb_scoperto$deb_scoperto_cc), color = 'red')
+```
+```{r}
+# se avete consigli su che variabili prendere in considerazione per fare l'analisi tell me please
 
