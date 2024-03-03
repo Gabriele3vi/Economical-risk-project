@@ -701,3 +701,111 @@ reddito_debito_res %>%
             debt_to_disposable_income = somma_deb_res_fascia / income_tot,
             )
 ```
+
+
+
+# FOCUS 2 - TOTALE RATE PAGATE NEL 2020
+
+Andiamo dunque a considerare il totale di rate pagate nel 2020 e facciamo qualche analisi. 
+
+Potremmo andare a calcolare:
+
+- la media delle rate pagate nel 2020
+
+- distribuzione delle rate pagate nel 2020
+
+- la suddivisione in res, aimm, fam, prof
+
+- la distribuzione geografica
+
+- vedere quanti hanno estinto il debito nel 2020 (=> cioè DEB RES = 0, mentre TOT RATE PAGATE NEL 2020 != 0) e capire che tipo di mutuo hanno estinto
+
+- professione di persone che hanno estinto il debito ed età
+
+- occupazione di quelli con rate + alte e di quelli con rate + basse
+
+- numero componenti famiglia di chi ha rate + alte e + basse
+
+ 
+
+### PERCENTUALE DI HOUSEHOLDS CON RATE NEL 2020
+```{r}
+# per prima cosa andiamo a sostituire i NaN con 0 e per calcolare quante persone hanno pagato delle rate nel 2020, facciamo il rapporto tra quelli che avevano tot_rate_pagate > 0 / (tot_rate_pagate = 0 + tot_rate_pagate != 0)
+
+debiti$tot_rate_pagate[is.na(debiti$tot_rate_pagate)] = 0
+
+si_rate = debiti$tot_rate_pagate[debiti$tot_rate_pagate > 0]
+
+perc_rate_pagate = length(si_rate)/(length(debiti$tot_rate_pagate))*100
+cat('Il totale di households che nel 2020 hanno pagato rate è:',perc_rate_pagate, '%')
+```
+
+
+### MEDIA DELLE RATE PAGATE NEL 2020
+
+
+```{r}
+# consideriamo poi soltanto i questionari con tot rate > 0
+
+summary(si_rate)
+```
+
+
+
+### DISTRIBUZIONE DELLE RATE PAGATE NEL 2020
+
+Possiamo utilizzare un istogramma e un qqplot per studiare la distribuzione delle rate pagate:
+
+```{r}
+rate_pagate = debiti %>% filter(tot_rate_pagate > 0) 
+
+ggplot(rate_pagate, aes(x = tot_rate_pagate, y = ..density..)) +
+  geom_histogram(col = 'purple', fill = 'lightpink') +
+  scale_x_log10() +
+  labs(title = 'Distribuzione rate pagate nel 2020', x = 'rate pagate', y = 'density')
+```
+
+
+
+### SUDDIVISIONE IN RES, AIMM, PROF, FAM
+```{r}
+# creiamo un dataset con la scomposizione delle rate pagate nel 2020
+
+percentuali_dataset <- debiti %>% filter(tot_rate_pagate >0) %>%
+  mutate(Perc_res = round((tot_rate_res / tot_rate_pagate) * 100, 1),
+         Perc_fam = round((tot_rate_fam / tot_rate_pagate) * 100, 1),
+         Perc_prof = round((tot_rate_professione / tot_rate_pagate) * 100, 1),
+         Perc_aimm = round((tot_rate_altri_immobili / tot_rate_pagate) * 100, 1)) 
+
+percentuali_dataset = percentuali_dataset %>% select(NQUEST, tot_rate_pagate, tot_rate_res, tot_rate_fam, tot_rate_professione, tot_rate_altri_immobili, Perc_res, Perc_fam, Perc_prof, Perc_aimm)
+
+percentuali_dataset
+```
+
+```{r}
+# andiamo a sommare i valori e vediamo com'è la scomposizione generale del totale rate pagate nel 2020
+
+valore_res = round((sum(percentuali_dataset$tot_rate_res[percentuali_dataset$tot_rate_res > 0]) / sum(percentuali_dataset$tot_rate_pagate[percentuali_dataset$tot_rate_pagate > 0])) *100, 2)
+
+valore_fam = round((sum(percentuali_dataset$tot_rate_fam[percentuali_dataset$tot_rate_fam > 0]) / sum(percentuali_dataset$tot_rate_pagate[percentuali_dataset$tot_rate_pagate > 0])) *100, 2)
+
+valore_prof = round((sum(percentuali_dataset$tot_rate_professione[percentuali_dataset$tot_rate_professione > 0]) / sum(percentuali_dataset$tot_rate_pagate[percentuali_dataset$tot_rate_pagate > 0])) *100, 2)
+
+valore_aimm = round((sum(percentuali_dataset$tot_rate_altri_immobili[percentuali_dataset$tot_rate_altri_immobili > 0]) / sum(percentuali_dataset$tot_rate_pagate[percentuali_dataset$tot_rate_pagate > 0])) *100, 2)
+
+categoria = c('Res', 'Fam', 'Aimm', 'Prof')
+valori = c(valore_res, valore_fam, valore_aimm, valore_prof)
+
+dataframe = data.frame(categoria, valori)
+dataframe
+```
+
+```{r}
+# creaiamo un grafico a barre
+
+ggplot(dataframe, aes(x = categoria, y = valori)) +
+  geom_bar(stat = 'identity', fill = heat.colors(length(dataframe$categoria)))
+```
+
+
+
