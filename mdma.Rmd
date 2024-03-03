@@ -177,12 +177,24 @@ head(debiti_full)
 
 Proviamo a fare un analisi sul debito per area geografica
 ```{r}
-debiti_full %>% filter(tot_debito > 0) %>% group_by(area_geografica) %>% summarize(mean = mean(tot_debito), median = median(tot_debito), sd = sd(tot_debito)) %>% arrange(desc(mean))
+debito_area_geografica = debiti_full %>% filter(tot_debito > 0) %>% group_by(area_geografica) %>% summarize(mean = mean(tot_debito), median = median(tot_debito), sd = sd(tot_debito)) %>% arrange(desc(mean))
+debito_area_geografica
+# Specify the path where you want to save the CSV file
+file_path <- "debito_residuo_per_area_geografica.csv"
+
+# Export the DataFrame to a CSV file
+write.csv(debito_area_geografica, file = file_path, row.names = TRUE)
 ```
 
 Proviamo a fare un analisi sul debito per regione di residenza
 ```{r}
-debiti_full %>% filter(tot_debito > 0) %>% group_by(regione_residenza) %>% summarize(mean = mean(tot_debito), median = median(tot_debito), sd = sd(tot_debito)) %>% arrange(desc(mean))
+debito_per_regione = debiti_full %>% filter(tot_debito > 0) %>% group_by(regione_residenza) %>% summarize(mean = mean(tot_debito), median = median(tot_debito), sd = sd(tot_debito)) %>% arrange(desc(mean))
+debito_per_regione
+file_path <- "debito_residuo_per_regione.csv"
+
+# Export the DataFrame to a CSV file
+write.csv(debito_per_regione, file = file_path, row.names = TRUE)
+
 ```
 
 Proviamo a fare un analisi sul debito per ampiezza del comune di residenza
@@ -219,7 +231,10 @@ Guardiamo la distribuzione di questi valori attraverso l'utilizzo di un'istogram
 ```{r}
 library(ggplot2)
 
-ggplot(pfimm, aes(x = deb_res_immobili)) +geom_histogram(bins = 60) + geom_vline(xintercept = median(pfimm$deb_res_immobili), color = 'red') + geom_vline(xintercept = mean(pfimm$deb_res_immobili), color = 'green')
+ggplot(pfimm, aes(x = deb_res_immobili, y = ..density..)) + 
+  geom_histogram(bins = 60) + 
+  geom_vline(xintercept = median(pfimm$deb_res_immobili), color = 'red') + 
+  geom_vline(xintercept = mean(pfimm$deb_res_immobili), color = 'green')
 ```
 Possiamo vedere come la distribuzione dei valori del debito residuo per acquisto/ristrutturazione immobili non sia normale, ma right-skewed, dal momento che la media ha un valore superiore della mediana.
 
@@ -254,12 +269,15 @@ In relazione a:
 
 ### NUMERO COMPONENTI
 
+
 ```{r}
+
+# Qui ci sta lasciare la mediana invece della media
 pfimm_n_componenti = debiti_full %>% filter(deb_res_immobili > 0) %>% group_by(numero_componenti) %>% summarize(mean = mean(deb_res_immobili), median = median(deb_res_immobili), sd = sd(deb_res_immobili)) %>% arrange()
 
-ggplot(pfimm_n_componenti, aes(x = numero_componenti, y = mean)) +
+ggplot(pfimm_n_componenti, aes(x = numero_componenti, y = median)) +
   geom_bar(stat = "identity", fill = "skyblue", color = "black") +
-  labs(title = "Media del debito residuo per numero di componenti",
+  labs(title = "Mediana del debito residuo per numero di componenti",
        x = "Numero di componenti",
        y = "Media del debito residuo") 
 
@@ -309,12 +327,21 @@ Guardiamo la distribuzione di questi valori attraverso l'utilizzo di un'istogram
 
 ```{r}
 library(ggplot2)  
+
 ggplot(pfaz, aes(x = deb_res_professione)) +
   geom_histogram(bins = 30) + 
   geom_vline(xintercept = median(pfaz$deb_res_professione), color = 'red') +
   geom_vline(xintercept = mean(pfaz$deb_res_professione), color = 'green') +
   scale_x_log10()
 ```
+Provo a vedere se i debiti res professione sono normali come sembrano
+```{r}
+ggplot(data = (debiti_full %>% filter(debiti_professione > 0)), aes(sample = debiti_professione)) +
+  stat_qq() +
+  stat_qq_line()
+```
+
+
 
 ### Analisi sul debito e variabili sociodemografiche
 In primis ci salviamo da carcom solo le variabili utili per essere analizzate col debito, ed eliminiamo i doppioni.
@@ -349,6 +376,7 @@ ggplot(pfaz_status, aes(x = status_lavoratore, y = mean)) +
 
 ### QUALIFICA
 ```{r}
+#Quqesto forse meh
 pfaz_qual = debiti_pfaz %>% filter(deb_res_professione > 0) %>% group_by(qualifica_lavoratore) %>% summarize(mean = mean(deb_res_professione), median = median(deb_res_professione), sd = sd(deb_res_professione)) %>% arrange() %>% mutate('Qualifica' = c('operaio', 'impiegato', 'dirigente', 'imprenditore/libero professionista', 'altro autonomo', 'pensionato', 'altro non occupato')) %>% select(Qualifica, everything())
 
 colori = c('lightgreen', 'lightblue', 'lightpink', 'yellow', 'darkorange', 'red', 'darkblue')
