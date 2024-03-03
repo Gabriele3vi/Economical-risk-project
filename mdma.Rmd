@@ -453,6 +453,251 @@ ggplot(deb_scoperto, aes(x = deb_scoperto_cc)) +
   geom_vline(xintercept = mean(deb_scoperto$deb_scoperto_cc), color = 'green') +
   geom_vline(xintercept = median(deb_scoperto$deb_scoperto_cc), color = 'red')
 ```
-```{r}
-# se avete consigli su che variabili prendere in considerazione per fare l'analisi tell me please
 
+
+# Economical risk project
+```{r}
+# Qui dovete mettere il vostro path
+setwd("C:\\Users\\Alberto-PC\\Downloads\\ind20_ascii\\CSV")
+```
+
+## carico Tidyverse
+```{r}
+library(tidyverse)
+```
+
+```{r}
+carcom20 <- read.csv("~/GitHub/Economical-risk-project/Indagine_2020/carcom20.csv", sep=";")
+debiti20 <- read.csv("~/GitHub/Economical-risk-project/Indagine_2020/debiti20.csv", sep=";")
+alld2_res <- read.csv("~/GitHub/Economical-risk-project/Indagine_2020/alld2_res.csv", sep=";")
+alld2_prof <- read.csv("~/GitHub/Economical-risk-project/Indagine_2020/alld2_prof.csv", sep=";")
+alld2_fam <- read.csv("~/GitHub/Economical-risk-project/Indagine_2020/alld2_fam.csv", sep=";")
+alld2_aimm <- read.csv("~/GitHub/Economical-risk-project/Indagine_2020/alld2_aimm.csv", sep=";")
+```
+
+TDEBITC (mezzi di trasporto), TDEBITD (beni durevoli), TDEBITE (beni non durevoli), TDEBITF (altri acquisti o spese quotidiane), TDEBITG (spese di istruzione)
+```{r}
+debiti20
+```
+
+##PCONS - Distribuzione per componente
+#Analisi componenti debito residuo per acquisto beni di consumo rispetto varie voci (trasporto, beni durevoli, beni non durevoli, altri acquisti/spese quotidiane, istruzione:
+```{r}
+percent_residual_debt_transportation <- sum(debiti20$TDEBITC, na.rm = TRUE) / sum(debiti20$PFCONS, na.rm = TRUE)
+percent_residual_debt_durable <- sum(debiti20$TDEBITD, na.rm = TRUE) / sum(debiti20$PFCONS, na.rm = TRUE)
+percent_residual_debt_nondurable <- sum(debiti20$TDEBITE, na.rm = TRUE) / sum(debiti20$PFCONS, na.rm = TRUE)
+percent_residual_debt_other_everydayexpenses <- sum(debiti20$TDEBITF, na.rm = TRUE) / sum(debiti20$PFCONS, na.rm = TRUE)
+percent_residual_debt_education <- sum(debiti20$TDEBITG, na.rm = TRUE) / sum(debiti20$PFCONS, na.rm = TRUE)
+
+perc <- data.frame(
+  "Percent_residual_debt" = c(
+    "Transportation" = percent_residual_debt_transportation,
+    "Durable" = percent_residual_debt_durable,
+    "Non-durable" = percent_residual_debt_nondurable,
+    "Other Everyday Expenses" = percent_residual_debt_other_everydayexpenses,
+    "Education" = percent_residual_debt_education))
+print(perc)
+```
+
+```{r}
+percentages <- c(
+  "Transportation" = percent_residual_debt_transportation,
+  "Durable" = percent_residual_debt_durable,
+  "Non-durable" = percent_residual_debt_nondurable,
+  "Other Everyday Expenses" = percent_residual_debt_other_everydayexpenses,
+  "Education" = percent_residual_debt_education)
+
+df <- data.frame(
+  group = names(percentages),
+  value = percentages)
+
+pie_chart <- ggplot(df, aes(x = "", y = value, fill = group)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar("y", start = 0) +
+  ggtitle("Percentage of Residual Debt by Category") +
+  theme_void()
+print(pie_chart)
+```
+
+
+#ATTENZIONE QUI NO DISTINCT
+#Seleziono informazioni secondo CFCRED = 1 (capofamiglia con maggiore reddito):
+```{r}
+carcom20 = filter(carcom20, CFRED == 1)
+```
+
+MUTUOIN3 -> media, somma (totale mutuo che viene erogato)
+TDEBITA3 -> media, somma ()
+media(TAEG3)
+tasso medio ponderato = (sum(TAEG3)*MUTUOIN3)/sum(TAEG3)
+groupby(DEB3)
+```{r}
+alld2_fam[is.na(alld2_fam)] <- 0
+```
+
+```{r}
+alld2_fam$DEBM3 <- factor(alld2_fam$DEBM3,
+                          levels = c(1, 2, 3, 4, 5),
+                          labels = c("acquisto di mezzi di trasporto (come auto, moto)",
+                                     "acquisto di altri beni durevoli (come elettronica, mobili, elettrodomestici, ecc.)",
+                                     "acquisto di beni non durevoli (vacanze, ecc..)",
+                                     "altri acquisti o spese quotidiane",
+                                     "spese di istruzione (laurea, master)"))
+```
+
+TDEBITA3 = ammontare del debito residuo
+MUTUOIN3 = importo iniziale del debito
+#calcolo ratio TDEBITA3/MUTUOIN3
+```{r}
+alld2_fam %>% group_by(DEBM3) %>% summarize(n = n(),
+                                            somma_mutuo3 = sum(MUTUOIN3),
+                                            mean_mutuo3 = mean(MUTUOIN3),
+                                            mean_tdebita3 = mean(TDEBITA3),
+                                            somma_tdebita3 = sum(TDEBITA3),
+                                            mean_taeg = mean(TAEG3),
+                                            tasso_medio_ponderato_taeg =(sum(TAEG3*MUTUOIN3)/sum(MUTUOIN3))
+                                            )
+```
+ripartizione del mutuo all'origine, tassi
+tdebita3 = pfcons spaccato nelle 5 componenti
+#da aggiungere sum(tdebita3)/sum(MUTUOIN3) = percentuale ancora da pagare
+#durata media ponderata del mutuo
+
+```{r}
+alld2_fam$TIPOTAX3 <- factor(alld2_fam$TIPOTAX3,
+                               levels = c(1, 2, 3),
+                               labels = c('Fisso',
+                                          'Variabile',
+                                          'Zero'))
+```
+
+#apertura per TIPOTAX3 = Il tasso è fisso, variabile o zero?
+```{r}
+alld2_fam %>% group_by(TIPOTAX3) %>% summarize(n = n(),
+                                            somma_mutuo3 = sum(MUTUOIN3),
+                                            mean_mutuo3 = mean(MUTUOIN3),
+                                            mean_tdebita3 = mean(TDEBITA3),
+                                            somma_tdebita3 = sum(TDEBITA3),
+                                            mean_taeg = mean(TAEG3),
+                                            tasso_medio_ponderato =(sum(TAEG3*MUTUOIN3)/sum(MUTUOIN3))
+                                            )
+```
+
+##DEBM3 (tipo di debito)
+MUTUODU3 = Qual è la durata complessiva in anni del debito inizialmente stabilita?
+#durata media in anni del debito inizialmente stabilita per tipo di debito
+```{r}
+alld2_fam %>% group_by(DEBM3) %>% summarize(mean_anni_durata_mutuo = mean(MUTUODU3))
+```
+# MUTUOIN3 = Qual era l’importo iniziale del debito?
+```{r}
+somma_mutuo = alld2_fam %>% group_by(NQUEST) %>% summarize(somma_mutuoin3 = sum(MUTUOIN3))
+```
+
+```{r}
+debito = inner_join(debiti20, somma_mutuo, by = "NQUEST")
+```
+
+```{r}
+carcom_tot = left_join(carcom20, debito, by = "NQUEST")
+```
+
+```{r}
+carcom_tot$CLETA5 <- factor(carcom_tot$CLETA5,
+                               levels = c(1, 2, 3, 4, 5),
+                               labels = c('fino a 34 anni',
+                                          '35-44',
+                                          '45-54',
+                                          '55-64',
+                                          'oltre 64'))
+```
+
+
+#pecentuale per fascia età di richiedenti mutuo
+```{r}
+carcom_tot %>% 
+  group_by(CLETA5) %>% 
+  summarize(tot_richiesta_mutuo_count = sum(!is.na(somma_mutuoin3)), 
+            tot_fascia_eta = n(), 
+            tot_creditoconsumo_fascia_eta = tot_richiesta_mutuo_count / tot_fascia_eta,
+            )
+```
+```{r}
+carcom_tot$AREA5 <- factor(carcom_tot$AREA5,
+                               levels = c(1, 2, 3, 4, 5),
+                               labels = c('Nord Ovest',
+                                          'Nord Est',
+                                          'Centro',
+                                          'Sud',
+                                          'Isole'))
+```
+
+#percentuale per fascia età di richiedenti mutuo
+(1=Nord Ovest, 2=Nord Est, 3=Centro, 4=Sud, 5=Isole)
+```{r}
+carcom_tot %>% 
+  group_by(AREA5) %>% 
+  summarize(mutuo_count = sum(!is.na(somma_mutuoin3)), 
+            tot_fascia_eta = n(), 
+            tot_creditoconsumo_fascia_eta = mutuo_count / tot_fascia_eta,
+            )
+```
+
+##Disposable income analysis: debt to disposable income
+```{r}
+setwd("C:/Users/Alberto-PC/Downloads/ind20_ascii/CSV")
+rfam20 <- read.csv("~/GitHub/Economical-risk-project/Indagine_2020/rfam20.csv", sep=",")
+```
+
+```{r}
+sum(rfam20$Y)
+```
+##debito residuo su reddito 
+```{r}
+reddito_debito_res = left_join(carcom_tot, rfam20, by = "NQUEST")
+```
+
+
+```{r}
+reddito_debito_res$CLETA5 <- factor(reddito_debito_res$CLETA5,
+                               levels = c(1, 2, 3, 4, 5),
+                               labels = c('fino a 34 anni',
+                                          '35-44',
+                                          '45-54',
+                                          '55-64',
+                                          'oltre 64'))
+```
+
+
+```{r}
+reddito_debito_res %>% 
+  group_by(CLETA5) %>% 
+  summarize(somma_deb_res_fascia = sum(PFCONS, na.rm = T),
+            income_tot = sum(Y, na.rm = T),
+            debt_to_disposable_income = somma_deb_res_fascia / income_tot,
+            )
+```
+```{r}
+reddito_debito_res %>% 
+  group_by(NPERC) %>% 
+  summarize(somma_deb_res_fascia = sum(PFCONS, na.rm = T),
+            income_tot = sum(Y, na.rm = T),
+            debt_to_disposable_income = somma_deb_res_fascia / income_tot,
+            )
+```
+```{r}
+reddito_debito_res %>% 
+  group_by(QUAL) %>% 
+  summarize(somma_deb_res_fascia = sum(PFCONS, na.rm = T),
+            income_tot = sum(Y, na.rm = T),
+            debt_to_disposable_income = somma_deb_res_fascia / income_tot,
+            )
+```
+```{r}
+reddito_debito_res %>% 
+  group_by(QUAL) %>% 
+  summarize(somma_deb_res_fascia = sum(PFCONS, na.rm = T),
+            income_tot = sum(Y, na.rm = T),
+            debt_to_disposable_income = somma_deb_res_fascia / income_tot,
+            )
+```
