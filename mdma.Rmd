@@ -113,6 +113,15 @@ debiti = replace(debiti, is.na(debiti), 0)
 ```
 
 
+
+```{r}
+regions_data = read.csv("codici_regioni_prov_comuni.csv", sep=";")
+regions_data = regions_data %>% select(Codice.Regione, Denominazione.Regione, Ripartizione.geografica, Codice.Ripartizione.Geografica)
+regions_data = distinct(regions_data)
+regions_data = regions_data %>% rename("regione_residenza" = "Codice.Regione")
+regions_data
+```
+
 # Analisi dati
 
 Aggiungo una colonna chiamata "Totale debito" che è la somma di: 
@@ -162,7 +171,7 @@ In primis ci salviamo da carcom solo le variabili utili per essere analizzate co
 ed eliminiamo i doppioni 
 
 ```{r}
-carcom_per_debito = carcom %>% select(NQUEST, numero_componenti, area_geografica, regione_residenza, ampiezza_comune)
+carcom_per_debito = carcom %>% select(NQUEST, numero_componenti, NPERC,area_geografica, regione_residenza, ampiezza_comune)
 
 # ora elimino i duplicati dal dataframe
 carcom_per_debito = distinct(carcom_per_debito)
@@ -189,11 +198,13 @@ write.csv(debito_area_geografica, file = file_path, row.names = TRUE)
 Proviamo a fare un analisi sul debito per regione di residenza
 ```{r}
 debito_per_regione = debiti_full %>% filter(tot_debito > 0) %>% group_by(regione_residenza) %>% summarize(mean = mean(tot_debito), median = median(tot_debito), sd = sd(tot_debito)) %>% arrange(desc(mean))
-debito_per_regione
-file_path <- "debito_residuo_per_regione.csv"
+debito_per_regione = merge(debito_per_regione, regions_data, by="regione_residenza")
 
-# Export the DataFrame to a CSV file
-write.csv(debito_per_regione, file = file_path, row.names = TRUE)
+ggplot(debito_per_regione) +
+  geom_bar(aes(x = reorder(Denominazione.Regione, +median), y = median, fill = Ripartizione.geografica), stat="identity") +
+  coord_flip() +
+  labs(x = "Regione", y = "Debito residuo mediano per regione")
+
 
 ```
 
@@ -201,6 +212,98 @@ Proviamo a fare un analisi sul debito per ampiezza del comune di residenza
 ```{r}
 debiti_full %>% filter(tot_debito > 0) %>% group_by(ampiezza_comune) %>% summarize(mean = mean(tot_debito), median = median(tot_debito), sd = sd(tot_debito)) %>% arrange(desc(mean))
 ```
+
+
+Ora voglio vedere se c'è una correlazione tra il numero di percettori di reddito di una famiglia e il debito
+```{r}
+debiti_full = debiti_full %>% mutate(rapp_perc = NPERC/numero_componenti)
+
+ggplot(debiti_full %>% filter(tot_debito > 0)) +
+  geom_point(aes(x=rapp_perc, y = tot_debito))
+```
+
+```{r}
+model = lm(tot_debito ~ rapp_perc, data = debiti_full %>% filter(tot_debito > 0))
+summary(model)
+```
+
+Dalla regressione lineare possiamo vedere come il coefficiente di legato a rapp_perc abbia un p-value bello alto, quindi dobbiamo rigettare l'ipotesi che ci sia una correlazione tra numero di percettori di reddito dij una famiglia e il debito residuo
+
+
+
+# Debiti con o senza garanzie reali
+si parla sempre di debito residuo, è interessante vedere per ogni famiglia come è distribuita la quota del debito
+```{r}
+con_deb = debiti_full %>% filter(tot_debito > 0)
+con_deb = con_deb %>% mutate(perc_gar_real = deb_garanzie_reali/tot_debito)
+con_deb = con_deb %>% mutate(perc_gar_non_real = 1-perc_gar_real)
+
+con_deb %>% select(NQUEST, perc_gar_real)
+
+ggplot(con_deb) +
+  geom_histogram(aes(x = perc_gar_real))
+```
+
+```{r}
+summary(con_deb$perc_gar_real)
+```
+
+Assegno una classe alle famiglie che hanno praticamente solo debito con garanzie reali
+```{r}
+con_deb = con_deb %>% mutate(gar_real = ifelse(perc_gar_real > 0.75, 1, 0)) 
+
+con_deb %>% group_by(gar_real) %>% summarize(count = n())
+
+tipo = con_deb %>% select(NQUEST, gar_real)
+
+hs_eta = carcom %>% group_by(NQUEST) %>% summarize(eta_media = mean(ETA))
+con_deb = merge(con_deb, hs_eta, by="NQUEST")
+```
+
+```{r}
+ggplot(con_deb) +
+  geom_point(aes(x = eta_media, y = tot_debito)) +
+  scale_y_log10()
+```
+Da questo grafico possiamo dire che tendenzialmente non c'è una correlazione tra eta media e debito residuo, ma forse possiamo dire che 
+
+
+
+```{r}
+ggplot(con_deb) +
+  geom_point(aes(x = eta_media, y = gar_real)) 
+```
+
+
+ L'età non è nemmeno un indicatore di debito con garanzie reali o no
+ 
+```{r}
+#Vediamo se a livello geografico c'è una qualche differenza  tra chi ah debiti con garanzie reali e chi no
+
+perc_gar_real_reg = con_deb %>% group_by(regione_residenza) %>% summarize(perc_con_gar_real = sum(gar_real)/n()) %>% arrange(desc(perc_con_gar_real))
+perc_gar_real_reg
+```
+ Sono risultati interessanti, facciamo un barplot associando le etichette delle regioni
+ 
+```{r}
+perc_gar_real_reg = merge(perc_gar_real_reg, regions_data, by="regione_residenza")
+perc_gar_real_reg
+
+```
+
+Faccio il grafico
+```{r}
+ggplot(perc_gar_real_reg) +
+  geom_bar(aes(x = reorder(Denominazione.Regione, +perc_con_gar_real), y = perc_con_gar_real, fill = Ripartizione.geografica), stat="identity") +
+  coord_flip() +
+  labs(x = "Regione", y = "% di debiti con garanzie reali sul totale ")
+```
+ 
+ 
+```{r}
+con_deb
+```
+ 
 
 
 # ANALISI COMPONENTI DEL DEBITO RESIDUO
@@ -335,11 +438,6 @@ ggplot(pfaz, aes(x = deb_res_professione)) +
   scale_x_log10()
 ```
 Provo a vedere se i debiti res professione sono normali come sembrano
-```{r}
-ggplot(data = (debiti_full %>% filter(debiti_professione > 0)), aes(sample = debiti_professione)) +
-  stat_qq() +
-  stat_qq_line()
-```
 
 
 
@@ -351,13 +449,14 @@ carcom_pfaz = carcom %>% select(NQUEST, classe_eta, numero_componenti, PERL, NPE
 
 carcom_pfaz = distinct(carcom_pfaz)
 
-head(carcom_pfaz)
 ```
 
 Ora facciamo il merge tra i due dataset
 
 ```{r}
 debiti_pfaz = merge(carcom_pfaz,debiti, by = "NQUEST")
+debiti_pfaz %>% select(NQUEST, qualifica_lavoratore,deb_res_professione) %>% filter(deb_res_professione > 0) %>%arrange(desc(NQUEST))
+
 ```
 
 
@@ -806,6 +905,9 @@ dataframe
 ggplot(dataframe, aes(x = categoria, y = valori)) +
   geom_bar(stat = 'identity', fill = heat.colors(length(dataframe$categoria)))
 ```
+
+
+
 
 
 
