@@ -910,4 +910,253 @@ ggplot(dataframe, aes(x = categoria, y = valori)) +
 
 
 
+###da estrarre da dati_pond
+```{r}
+SEX <- read.csv("C:/Users/Alberto-PC/Documents/GitHub/Economical-risk-project/dati_pond/SEX_PESOFIT.csv", sep = ";")
+```
+
+
+```{r}
+STUDIO <- read.csv("C:/Users/Alberto-PC/Documents/GitHub/Economical-risk-project/dati_pond/STUDIO_PESOFIT.csv", sep =";")
+SETT <- read.csv("C:/Users/Alberto-PC/Documents/GitHub/Economical-risk-project/dati_pond/SETT_PESOFIT.csv", sep =";")
+IREG <- read.csv("C:/Users/Alberto-PC/Documents/GitHub/Economical-risk-project/dati_pond/IREG_PESOFIT.csv", sep =";")
+ACOM5 <- read.csv("C:/Users/Alberto-PC/Documents/GitHub/Economical-risk-project/dati_pond/ACOM5_PESOFIT.csv", sep =";")
+QUAL <- read.csv("C:/Users/Alberto-PC/Documents/GitHub/Economical-risk-project/dati_pond/QUAL_PESOFIT.csv", sep =";")
+AREA5 <- read.csv("C:/Users/Alberto-PC/Documents/GitHub/Economical-risk-project/dati_pond/AREA5_PESOFIT.csv", sep =";")
+CLETA5 <- read.csv("C:/Users/Alberto-PC/Documents/GitHub/Economical-risk-project/dati_pond/CLETA5_PESOFIT.csv", sep =";")
+Q <- read.csv("C:/Users/Alberto-PC/Documents/GitHub/Economical-risk-project/dati_pond/Q_PESOFIT.csv", sep =";")
+```
+
+
+```{r}
+SEX$SEX <- factor(SEX$SEX,
+                  levels = c(1, 2),
+                  labels = c("uomo",
+                             "donna"))
+SEX
+```
+### PERCENTAGES by category of debt (in terms of total value of residual debt)
+```{r}
+SEX %>% reframe("Sex" = SEX, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+### number of individuals indebted
+```{r}
+SEX %>% reframe("Sex" = SEX, "Households indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Households indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Households indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Households indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+SEX %>% reframe("Sex" = SEX, "Debt over wealth household" = Deb_tot_pond/sum_W_pond, "Debt over income household" = Deb_tot_pond/sum_Y_FAM_pond)
+```
+
+#INDEBITAMENTO PER L’ABITAZIONE DI RESIDENZA
+```{r}
+STUDIO$STUDIO <- factor(STUDIO$STUDIO,
+                  levels = c(1, 2, 3, 4, 5, 6, 7, 8),
+                  labels = c("nessuno",
+                             "licenza elementare",
+                             "licenza media inferiore",
+                             "diploma professionale (3 anni)",
+                             "diploma media superiore",
+                             "dipl. universitario/laurea triennale",
+                             "laurea/laurea magistrale",
+                             "specializzazione post-laurea"))
+STUDIO
+```
+### PERCENTAGES by category of debt (in terms of total value of residual debt)
+```{r}
+STUDIO %>% reframe("Education level" = STUDIO, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+### number of individuals indebted
+```{r}
+STUDIO %>% reframe("Education level" = STUDIO, "Households indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Households indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Households indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Households indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+STUDIO %>% reframe("Education level" = STUDIO, "Debt over wealth household" = Deb_tot_pond/sum_W_pond, "Debt over income household" = Deb_tot_pond/sum_Y_FAM_pond)
+```
+
+
+```{r}
+SETT$SETT <- factor(SETT$SETT,
+                  levels = c(1, 2, 3, 4, 5),
+                  labels = c("agricoltura",
+                             "industria",
+                             "servizi pubblici",
+                             "altri settori",
+                             "nessun"))
+SETT
+```
+### PERCENTAGES by category of debt (in terms of total value of residual debt)
+```{r}
+SETT %>% reframe("Sector" = SETT, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+### number of individuals indebted
+```{r}
+SETT %>% reframe("Sector" = SETT, "Households indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Households indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Households indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Households indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+SETT %>% reframe("Sector" = SETT, "Debt over wealth household" = Deb_tot_pond/sum_W_pond, "Debt over income household" = Deb_tot_pond/sum_Y_FAM_pond)
+```
+
+
+```{r}
+IREG$IREG <- factor(IREG$IREG,
+                  levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20),
+                  labels = c("Piemonte",
+                             "Valle d'Aosta",
+                             "Lombardia",
+                             "Trentino",
+                             "Veneto",
+                             "Friuli",
+                             "Liguria",
+                             "Emilia Romagna",
+                             "Toscana",
+                             "Umbria",
+                             "Marche",
+                             "Lazio",
+                             "Abruzzo",
+                             "Molise",
+                             "Campania",
+                             "Puglia",
+                             "Basilicata",
+                             "Calabria",
+                             "Sicilia",
+                             "Sardegna"))
+IREG
+```
+
+### PERCENTAGES by category of debt (in terms of total value of residual debt)
+```{r}
+IREG %>% reframe("Region" = IREG, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+### number of individuals indebted
+```{r}
+IREG %>% reframe("Region" = IREG, "Households indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Households indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Households indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Households indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+IREG %>% reframe("Region" = IREG, "Debt over wealth household" = Deb_tot_pond/sum_W_pond, "Debt over income household" = Deb_tot_pond/sum_Y_FAM_pond)
+```
+
+#ACOM5 = ampiezza demografica del comune
+```{r}
+ACOM5$ACOM5 <- factor(ACOM5$ACOM5,
+                  levels = c(1, 2, 3, 4, 5),
+                  labels = c("fino a 5.000 abitanti",
+                             "5.000-20.000",
+                             "20.000-50.000",
+                             "50.000-200.000",
+                             "oltre 200.000"
+))
+ACOM5
+```
+### PERCENTAGES by category of debt (in terms of total value of residual debt)
+```{r}
+ACOM5 %>% reframe("Demographic size of the municipality" = ACOM5, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+### number of individuals indebted
+```{r}
+ACOM5 %>% reframe("Demographic size of the municipality" = ACOM5, "Households indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Households indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Households indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Households indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+ACOM5 %>% reframe("Demographic size of the municipality" = ACOM5, "Debt over wealth household" = Deb_tot_pond/sum_W_pond, "Debt over income household" = Deb_tot_pond/sum_Y_FAM_pond)
+```
+#QUAL = status del lavoratore
+```{r}
+QUAL$QUAL <- factor(QUAL$QUAL,
+                  levels = c(1, 2, 3, 4, 5, 6, 7),
+                  labels = c("operaio",
+                             "impiegato",
+                             "dirigente/direttivo",
+                             "imprenditore/libero
+professionista",
+                             "altro autonomo",
+"pensionato",
+"altri non occupati"
+))
+QUAL
+```
+### PERCENTAGES by category of debt (in terms of total value of residual debt)
+```{r}
+QUAL %>% reframe("Worker status" = QUAL, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+### number of individuals indebted
+```{r}
+QUAL %>% reframe("Worker status" = QUAL, "Households indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Households indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Households indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Households indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+QUAL %>% reframe("Worker status" = QUAL, "Debt over wealth household" = Deb_tot_pond/sum_W_pond, "Debt over income household" = Deb_tot_pond/sum_Y_FAM_pond)
+```
+
+#AREA5 = area geografica
+```{r}
+AREA5$AREA5 <- factor(AREA5$AREA5,
+                  levels = c(1, 2, 3, 4, 5),
+                  labels = c("Nord Ovest",
+                             "Nord Est",
+                             "Centro",
+                             "Sud",
+                             "Isole"
+))
+AREA5
+```
+### PERCENTAGES by category of debt (in terms of total value of residual debt)
+```{r}
+AREA5 %>% reframe("Regional area" = AREA5, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+### number of individuals indebted
+```{r}
+AREA5 %>% reframe("Regional area" = AREA5, "Households indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Households indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Households indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Households indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+AREA5 %>% reframe("Regional area" = AREA5, "Debt over wealth household" = Deb_tot_pond/sum_W_pond, "Debt over income household" = Deb_tot_pond/sum_Y_FAM_pond)
+```
+
+
+#CLETA5 = classe di età (1=fino a 34 anni, 2=35-44, 3=45-54, 4=55-64, 5=oltre 64)
+```{r}
+CLETA5$CLETA5 <- factor(CLETA5$CLETA5,
+                 levels = c(1, 2, 3, 4, 5),
+                 labels = c("fino a 34 anni", "from 35 to 44", "from 45 to 54", "from 55 to 64", "oltre 64"))
+CLETA5
+```
+#(ratio mean_debt/mean_mutuo[=importo iniziale del debito])
+### PERCENTAGES by category of debt (in terms of total value of residual debt)
+```{r}
+CLETA5 %>% reframe("Age classes" = CLETA5, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+### number of individuals indebted
+```{r}
+CLETA5 %>% reframe("Age classes" = CLETA5, "Households indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Households indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Households indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Households indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+CLETA5 %>% reframe("Age classes" = CLETA5, "Debt over wealth household" = Deb_tot_pond/sum_W_pond, "Debt over income household" = Deb_tot_pond/sum_Y_FAM_pond)
+```
+#Q = status del lavoratore (1=dipendente, 2=autonomo, 3=condiz. non professionale)
+```{r}
+Q$Q <- factor(Q$Q,
+                 levels = c(1, 2, 3),
+                 labels = c("dipendente", "autonomo", "condiz. non professionale"))
+Q
+```
+### PERCENTAGES by category of debt (in terms of total value of residual debt)
+```{r}
+Q %>% reframe("Worker status" = Q, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+### number of individuals indebted
+```{r}
+Q %>% reframe("Worker status" = Q, "Households indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Households indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Households indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Households indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+Q %>% reframe("Worker status" = Q, "Debt over wealth household" = Deb_tot_pond/sum_W_pond, "Debt over income household" = Deb_tot_pond/sum_Y_FAM_pond)
+```
+
+
+
 
