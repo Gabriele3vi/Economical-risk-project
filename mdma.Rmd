@@ -1156,7 +1156,220 @@ Q %>% reframe("Worker status" = Q, "Households indebted for real estate purchase
 ```{r}
 Q %>% reframe("Worker status" = Q, "Debt over wealth household" = Deb_tot_pond/sum_W_pond, "Debt over income household" = Deb_tot_pond/sum_Y_FAM_pond)
 ```
+################################################
+```{r}
+SEX_T <- read.csv("E:/Dati_al_10.03.2024/Zippato_giro_5/SEX_PESOFIT.csv", sep =";")
+STUDIO_T <- read.csv("E:/Dati_al_10.03.2024/Zippato_giro_5/STUDIO_PESOFIT.csv", sep =";")
+SETT_T <- read.csv("E:/Dati_al_10.03.2024/Zippato_giro_5/SETT_PESOFIT.csv", sep =";")
+IREG_T <- read.csv("E:/Dati_al_10.03.2024/Zippato_giro_5/IREG_PESOFIT.csv", sep =";")
+ACOM5_T <- read.csv("E:/Dati_al_10.03.2024/Zippato_giro_5/ACOM5_PESOFIT.csv", sep =";")
+QUAL_T <- read.csv("E:/Dati_al_10.03.2024/Zippato_giro_5/QUAL_PESOFIT.csv", sep =";")
+AREA5_T <- read.csv("E:/Dati_al_10.03.2024/Zippato_giro_5/AREA5_PESOFIT.csv", sep =";")
+CLETA5_T <- read.csv("E:/Dati_al_10.03.2024/Zippato_giro_5/CLETA5_PESOFIT.csv", sep =";")
+Q_T <- read.csv("E:/Dati_al_10.03.2024/Zippato_giro_5/Q_PESOFIT.csv", sep =";")
+```
+
+```{r}
+SEX_T$SEX <- factor(SEX_T$SEX,
+                  levels = c(1, 2),
+                  labels = c("uomo",
+                             "donna"))
+SEX_T
+```
+LOAN to VALUE = valore del prestito sul valore ipoteca (su mutuo) [quanta parte è garantita]
+Lenders use the LTV ratio to assess the risk of providing a mortgage loan. A higher LTV ratio indicates that the borrower has less equity in the property and therefore represents a higher risk for the lender.
+```{r}
+SEX_T %>% reframe("Sex" = SEX, "LOAN to VALUE" = LTV1_pond_MUTUOIN1, "Participation rate" = n_indeb_compl_pond/freq_pond)
+```
+```{r}
+SEX_T %>% reframe("Sex" = SEX, "Weighted Mean Tax residential building" = Tasso_pond1, "Weighted Mean Tax other real estate" = Tasso_pond2, "Weighted Mean Tax family needs" = TAEG_pond3, "Weighted Mean Tax professional activity" = Tasso_pond4)
+```
+```{r}
+STUDIO_T$STUDIO <- factor(STUDIO_T$STUDIO,
+                  levels = c(1, 2, 3, 4, 5, 6, 7, 8),
+                  labels = c("nessuno",
+                             "licenza elementare",
+                             "licenza media inferiore",
+                             "diploma professionale (3 anni)",
+                             "diploma media superiore",
+                             "dipl. universitario/laurea triennale",
+                             "laurea/laurea magistrale",
+                             "specializzazione post-laurea"))
+STUDIO_T
+```
+
+```{r}
+STUDIO_T %>% reframe("Education level" = STUDIO, "LOAN to VALUE" = LTV1_pond_MUTUOIN1, "Participation rate" = n_indeb_compl_pond/freq_pond)
+```
+```{r}
+STUDIO_T %>% reframe("Education level" = STUDIO, "Weighted Mean Tax residential building" = Tasso_pond1, "Weighted Mean Tax other real estate" = Tasso_pond2, "Weighted Mean Tax family needs" = TAEG_pond3, "Weighted Mean Tax professional activity" = Tasso_pond4)
+```
+```{r}
+SETT_T$SETT <- factor(SETT_T$SETT,
+                  levels = c(1, 2, 3, 4, 5),
+                  labels = c("agricoltura",
+                             "industria",
+                             "servizi pubblici",
+                             "altri settori",
+                             "nessun"))
+SETT_T
+```
+```{r}
+SETT_T %>% reframe("Sector" = SETT, "LOAN to VALUE" = LTV1_pond_MUTUOIN1, "Participation rate" = n_indeb_compl_pond/freq_pond)
+```
+```{r}
+SETT_T %>% reframe("Sector" = SETT, "Weighted Mean Tax residential building" = Tasso_pond1, "Weighted Mean Tax other real estate" = Tasso_pond2, "Weighted Mean Tax family needs" = TAEG_pond3, "Weighted Mean Tax professional activity" = Tasso_pond4)
+```
+```{r}
+IREG_T$IREG <- factor(IREG_T$IREG,
+                  levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20),
+                  labels = c("Piemonte",
+                             "Valle d'Aosta",
+                             "Lombardia",
+                             "Trentino",
+                             "Veneto",
+                             "Friuli",
+                             "Liguria",
+                             "Emilia Romagna",
+                             "Toscana",
+                             "Umbria",
+                             "Marche",
+                             "Lazio",
+                             "Abruzzo",
+                             "Molise",
+                             "Campania",
+                             "Puglia",
+                             "Basilicata",
+                             "Calabria",
+                             "Sicilia",
+                             "Sardegna"))
+IREG_T
+```
+```{r}
+IREG_T %>% reframe("Region" = IREG, "LOAN to VALUE" = LTV1_pond_MUTUOIN1, "Participation rate" = n_indeb_compl_pond/freq_pond)
+```
+```{r}
+IREG_T %>% reframe("Region" = IREG, "Weighted Mean Tax residential building" = Tasso_pond1, "Weighted Mean Tax other real estate" = Tasso_pond2, "Weighted Mean Tax family needs" = TAEG_pond3, "Weighted Mean Tax professional activity" = Tasso_pond4)
+```
+```{r}
+ACOM5_T$ACOM5 <- factor(ACOM5_T$ACOM5,
+                  levels = c(1, 2, 3, 4, 5),
+                  labels = c("fino a 5.000 abitanti",
+                             "5.000-20.000",
+                             "20.000-50.000",
+                             "50.000-200.000",
+                             "oltre 200.000"
+))
+ACOM5_T
+```
 
 
+```{r}
+ACOM5_T %>% reframe("Demographic size of the municipality" = ACOM5, "LOAN to VALUE" = LTV1_pond_MUTUOIN1, "Participation rate" = n_indeb_compl_pond/freq_pond)
+```
+```{r}
+ACOM5_T %>% reframe("Demographic size of the municipality" = ACOM5, "Weighted Mean Tax residential building" = Tasso_pond1, "Weighted Mean Tax other real estate" = Tasso_pond2, "Weighted Mean Tax family needs" = TAEG_pond3, "Weighted Mean Tax professional activity" = Tasso_pond4)
+```
+```{r}
+QUAL_T$QUAL <- factor(QUAL_T$QUAL,
+                  levels = c(1, 2, 3, 4, 5, 6, 7),
+                  labels = c("operaio",
+                             "impiegato",
+                             "dirigente/direttivo",
+                             "imprenditore/libero
+professionista",
+                             "altro autonomo",
+"pensionato",
+"altri non occupati"
+))
+QUAL_T
+```
+
+```{r}
+QUAL_T %>% reframe("Qualification" = QUAL, "LOAN to VALUE" = LTV1_pond_MUTUOIN1, "Participation rate" = n_indeb_compl_pond/freq_pond)
+```
+```{r}
+QUAL_T %>% reframe("Qualification" = QUAL, "Weighted Mean Tax residential building" = Tasso_pond1, "Weighted Mean Tax other real estate" = Tasso_pond2, "Weighted Mean Tax family needs" = TAEG_pond3, "Weighted Mean Tax professional activity" = Tasso_pond4)
+```
+```{r}
+AREA5_T$AREA5 <- factor(AREA5_T$AREA5,
+                  levels = c(1, 2, 3, 4, 5),
+                  labels = c("Nord Ovest",
+                             "Nord Est",
+                             "Centro",
+                             "Sud",
+                             "Isole"
+))
+AREA5_T
+```
+
+```{r}
+AREA5_T %>% reframe("Area" = AREA5, "LOAN to VALUE" = LTV1_pond_MUTUOIN1, "Participation rate" = n_indeb_compl_pond/freq_pond)
+```
+```{r}
+AREA5_T %>% reframe("Area" = AREA5, "Weighted Mean Tax residential building" = Tasso_pond1, "Weighted Mean Tax other real estate" = Tasso_pond2, "Weighted Mean Tax family needs" = TAEG_pond3, "Weighted Mean Tax professional activity" = Tasso_pond4)
+```
+```{r}
+CLETA5_T$CLETA5 <- factor(CLETA5_T$CLETA5,
+                 levels = c(1, 2, 3, 4, 5),
+                 labels = c("fino a 34 anni", "from 35 to 44", "from 45 to 54", "from 55 to 64", "oltre 64"))
+CLETA5_T
+```
+
+```{r}
+CLETA5_T %>% reframe("Age classes" = CLETA5, "LOAN to VALUE" = LTV1_pond_MUTUOIN1, "Participation rate" = n_indeb_compl_pond/freq_pond)
+```
+```{r}
+CLETA5_T %>% reframe("Age classes" = CLETA5, "Weighted Mean Tax residential building" = Tasso_pond1, "Weighted Mean Tax other real estate" = Tasso_pond2, "Weighted Mean Tax family needs" = TAEG_pond3, "Weighted Mean Tax professional activity" = Tasso_pond4)
+```
+```{r}
+Q_T$Q <- factor(Q_T$Q,
+                 levels = c(1, 2, 3),
+                 labels = c("dipendente", "autonomo", "condiz. non professionale"))
+Q_T
+```
+
+```{r}
+Q_T %>% reframe("Qualification" = Q, "LOAN to VALUE" = LTV1_pond_MUTUOIN1, "Participation rate" = n_indeb_compl_pond/freq_pond)
+```
+```{r}
+Q_T %>% reframe("Qualification" = Q, "Weighted Mean Tax residential building" = Tasso_pond1, "Weighted Mean Tax other real estate" = Tasso_pond2, "Weighted Mean Tax family needs" = TAEG_pond3, "Weighted Mean Tax professional activity" = Tasso_pond4)
+```
+##############################################################
+
+```{r}
+TOT <- read.csv("E:/Dati_al_10.03.2024/Fam_Comp_Completo_PESOFIT/Fam_Comp_Completo_PESOFIT.csv", sep =";")
+```
+
+```{r}
+TOT[is.na(TOT)] <- 0
+TOT = TOT %>% filter(CFRED == 1)
+```
+
+```{r}
+TOT %>% reframe(sum(PFIMM_pond) , sum(PFCONS_pond), sum(PFAZ_pond), sum(PFCARTE_pond), sum(PFCC_pond), sum(PF3_pond))
+```
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+
+
+data <- data.frame(
+  group=c("Residual debt for real estate purchase/renovation", "Residual debt for consumer goods purchase", "Residual debt for professional reasons", "Credit card debt", "Overdraft on current accounts", "Debts owed to other families"
+),
+  value=c(106142886, 5311779, 22007891, 213081.2, 1228045, 2768980)
+)
+
+
+ggplot(data, aes(x="", y=value, fill=group)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+ 
+  theme_void() +
+  labs(fill = "Type of Debt") +
+  ggtitle("Total debt by type")
+```
 
 
