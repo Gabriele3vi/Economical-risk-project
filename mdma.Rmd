@@ -1671,5 +1671,161 @@ Q %>% reframe("Worker status" = Modalita, "Debt over wealth household" = Deb_tot
 Q %>% reframe("Worker status" = Modalita, "Participation rate" = n_indeb_compl_pond/freq_pond, "Weighted Mean Tax residential building" = Tasso_pond1, "Weighted Mean Tax other real estate" = Tasso_pond2, "Weighted Mean Tax family needs" = TAEG_pond3, "Weighted Mean Tax professional activity" = Tasso_pond4)
 ```
 
+################################ 2016 ################################
 
+```{r}
+TOT_16 <- read.csv("E:/Dati_al_12.03.2024/Report_con_PESO_2016_2020+dset_2016/FAM_COMP_16.csv", sep =";")
+```
+
+```{r}
+TOT_20 = read.csv("E:/Dati_al_10.03.2024/Fam_Comp_Completo_PESOFIT/Fam_Comp_Completo_PESOFIT.csv", sep =";")
+```
+
+```{r}
+TOT_16[is.na(TOT_16)] <- 0
+TOT_16 = TOT_16 %>% filter(CFRED == 1)
+```
+
+```{r}
+TOT_20[is.na(TOT_20)] <- 0
+TOT_20 = TOT_20 %>% filter(CFRED == 1)
+```
+
+```{r}
+TOT_16 %>% reframe(sum(PFIMM) , sum(PFCONS), sum(PFAZ), sum(PFCARTE), sum(PFCC), sum(PF3))
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+
+# Data for 2016
+data_2016 <- data.frame(
+  group = c("Residual debt for real estate purchase/renovation", "Residual debt for consumer goods purchase", "Residual debt for professional reasons", "Credit card debt", "Overdraft on current accounts", "Debts owed to other families"),
+  value = c(37132221, 3945708, 8645356, 216750.5, 826013.8, 2283400)
+)
+
+
+data_2020 <- data.frame(
+  group = c("Residual debt for real estate purchase/renovation", "Residual debt for consumer goods purchase", "Residual debt for professional reasons", "Credit card debt", "Overdraft on current accounts", "Debts owed to other families"),
+  value = c(106142886, 5311779, 22007891, 213081.2, 1228045, 2768980)
+)
+
+# Plot for 2016
+plot_2016 <- ggplot(data_2016, aes(x = "", y = value, fill = group)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar("y", start = 0) +
+  theme_void() +
+  labs(fill = "Type of Debt") +
+  ggtitle("Total debt by type (2016)")
+
+# Plot for 2017
+plot_2020 <- ggplot(data_2020, aes(x = "", y = value, fill = group)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar("y", start = 0) +
+  theme_void() +
+  labs(fill = "Type of Debt") +
+  ggtitle("Total debt by type (2020)")
+
+# Combine plots
+combined_plots <- plot_2016 + plot_2020 + plot_layout(ncol = 2)
+
+# Show combined plots
+combined_plots
+
+```
+```{r}
+TOT_16 <- read.csv("E:/Dati_al_12.03.2024/Report_con_PESO_2016_2020+dset_2016/Unico_x_export_PESO_2016.csv", sep =";")
+```
+
+```{r}
+TOT_20 = read.csv("E:/Dati_al_12.03.2024/Report_con_PESO_2016_2020+dset_2016/Unico_x_export_PESO_2020.csv", sep =";")
+```
+
+```{r}
+SEX_16 = TOT_16 %>% filter(Variabile == "SEX")
+STUDIO_16 = TOT_16 %>% filter(Variabile == "STUDIO")
+SETT_16 = TOT_16 %>% filter(Variabile == "SETT")
+IREG_16 = TOT_16 %>% filter(Variabile == "IREG")
+ACOM5_16 = TOT_16 %>% filter(Variabile == "ACOM5")
+QUAL_16 = TOT_16 %>% filter(Variabile == "QUAL")
+AREA5_16 = TOT_16 %>% filter(Variabile == "AREA5")
+CLETA5_16 = TOT_16 %>% filter(Variabile == "CLETA5")
+Q_16 = TOT_16 %>% filter(Variabile == "Q")
+```
+
+```{r}
+SEX_20 = TOT_20 %>% filter(Variabile == "SEX")
+STUDIO_20 = TOT_20 %>% filter(Variabile == "STUDIO")
+SETT_20 = TOT_20 %>% filter(Variabile == "SETT")
+IREG_20 = TOT_20 %>% filter(Variabile == "IREG")
+ACOM5_20 = TOT_20 %>% filter(Variabile == "ACOM5")
+QUAL_20 = TOT_20 %>% filter(Variabile == "QUAL")
+AREA5_20 = TOT_20 %>% filter(Variabile == "AREA5")
+CLETA5_20 = TOT_20 %>% filter(Variabile == "CLETA5")
+Q_20 = TOT_20 %>% filter(Variabile == "Q")
+```
+
+```{r}
+Q_20 %>% reframe("Worker status" = Modalita, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+
+Q_16 %>% reframe("Worker status" = Modalita, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+
+```{r}
+library(ggplot2)
+library(tidyr)
+
+
+df_year1 <- data.frame(
+  Worker_Status = c("dipendente", "autonomo", "condiz. non professionale"),
+  PFIMM = c(88.92631, 54.76551 ,48.96106),
+  PFCONS = c(6.045951, 2.526776, 13.175137),
+  PFAZ = c(2.494312, 39.035743, 23.165167),
+  PFCARTE = c(0.1459604, 0.1135561, 0.7122507),
+  PFCC = c(0.8142587, 1.1838348, 3.0247898),
+  PF3 = c(1.573208, 2.374578, 10.961594)
+)
+
+
+df_year2 <- data.frame(
+  Worker_Status = c("dipendente", "autonomo", "condiz. non professionale"),
+  PFIMM = c(87.09435, 49.92985, 59.43492),
+  PFCONS = c(6.611778, 2.898546, 17.611340),
+  PFAZ = c(1.367878, 43.778496, 2.135496),
+  PFCARTE = c(0.2410536, 0.1545640, 0.8504413),
+  PFCC = c(0.7159486, 1.4064204, 3.8380986),
+  PF3 = c(3.968990, 1.832121, 16.129704)
+)
+
+
+df_long_year1 <- pivot_longer(df_year1, cols = -Worker_Status, names_to = "Debt_Category", values_to = "Percentage")
+df_long_year2 <- pivot_longer(df_year2, cols = -Worker_Status, names_to = "Debt_Category", values_to = "Percentage")
+
+
+plot_year1 <- ggplot(df_long_year1, aes(x = Worker_Status, y = Percentage, fill = Debt_Category)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Year 2020: Distribution of Debt Categories by Worker status",
+       x = "Worker status",
+       y = "Percentage") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 9))
+
+
+plot_year2 <- ggplot(df_long_year2, aes(x = Worker_Status, y = Percentage, fill = Debt_Category)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Year 2016: Distribution of Debt Categories by Worker status",
+       x = "Worker status",
+       y = "Percentage") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 9))
+
+
+library(gridExtra)
+grid.arrange(plot_year1, plot_year2, ncol = 2)
+
+```
 
