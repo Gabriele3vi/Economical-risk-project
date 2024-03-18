@@ -1701,7 +1701,7 @@ model1 = lm(Indeb_tot_pond ~ SEX, data = TOT)
 summary(model1)
 ```
 ```{r}
-logit_model = glm(Indeb_tot_pond ~ NPERL + ETA + NCOMP + STUDIO, data = TOT)
+logit_model = lm(Indeb_tot_pond ~ NPERL + ETA + NCOMP + STUDIO, data = TOT)
 summary(logit_model)
 ```
 
@@ -1716,9 +1716,13 @@ summary(logit_model)
 more than one type of source of income [yes = 1, no = 0]; x28 - a steady increase in expenses since 2004 [yes = 1, no = 0]; x29 - share of expenditure on food and non-alcoholic beverages in household expenses [%]; x30 - have you ever encountered difficulties in accessing financial services or products [yes = 1, no = 0].
 
 ```{r}
-log_data = TOT[, c("Indeb_tot_pond", "ETA", "SEX", "STUDIO", "NCOMP", "NPERL", "W_pond", "ACOM4C", "Y_FAM_pond")]
+log_data = TOT[, c("Indeb_tot_pond", "ETA", "SEX", "STUDIO", "NCOMP", "NPERL", "ACOM4C","W_pond", "Y_FAM_pond")]
 ```
 
+```{r}
+vars_to_convert <- c("SEX", "STUDIO", "NCOMP", "ACOM4C")
+log_data <- log_data %>% mutate_at(vars(vars_to_convert), as.factor)
+```
 
 ```{r}
 null = lm(Indeb_tot_pond ~ 1, log_data)
@@ -1726,7 +1730,7 @@ full = lm(Indeb_tot_pond ~ ., log_data)
 step(full, scope = list(lower = null, upper = full), direction = "backward", k = 2, trace = 1)
 ```
 ```{r}
-model_tot = lm(formula = Indeb_tot_pond ~ ETA + NCOMP + NPERL + W_pond + ACOM4C + Y_FAM_pond, data = log_data)
+model_tot = lm(formula = Indeb_tot_pond ~ ETA + NCOMP + NPERL + ACOM4C + W_pond + Y_FAM_pond, data = log_data)
 summary(model_tot)
 ```
 ```{r}
@@ -1735,4 +1739,8 @@ jtools::summ(model_tot)
 ```{r}
 plot(model_tot)
 ```
+
+
+
+
 
