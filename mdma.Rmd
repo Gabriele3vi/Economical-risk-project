@@ -90,6 +90,7 @@ carcom$ampiezza_comune = as.factor(carcom$ampiezza_comune)
 ### Debiti
 Pulizia dataset debiti
 ```{r}
+nquest_backup = debiti$NQUEST
 debiti = debiti %>% rename("tot_rate_pagate" = RATADEB)
 
 debiti = debiti %>% rename("tot_rate_res" = RATADEB_RES)
@@ -116,6 +117,7 @@ debiti = debiti %>% rename("deb_no_garanzie_reali" = PFNOCOLL)
 # Peso i valori del debito per pesofit
 debiti = debiti* carcom$PESOFIT
 
+debiti$NQUEST = nquest_backup
 # Setto a 0 i dati NA
 debiti = replace(debiti, is.na(debiti), 0)
 ```
@@ -178,10 +180,11 @@ In primis ci salviamo da carcom solo le variabili utili per essere analizzate co
 ed eliminiamo i doppioni 
 
 ```{r}
-carcom_per_debito = carcom %>% select(NQUEST, numero_componenti, NPERC,area_geografica, regione_residenza, ampiezza_comune)
+carcom_per_debito = carcom %>% select(NQUEST, numero_componenti, NPERC, area_geografica, regione_residenza, ampiezza_comune)
 
 # ora elimino i duplicati dal dataframe
 carcom_per_debito = distinct(carcom_per_debito)
+carcom_per_debito
 ```
 
 Ora creo il dataframe facendo il join tra i carcom senza duplicati e debiti
