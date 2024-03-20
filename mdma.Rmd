@@ -90,8 +90,6 @@ carcom$ampiezza_comune = as.factor(carcom$ampiezza_comune)
 ### Debiti
 Pulizia dataset debiti
 ```{r}
-
-
 debiti = merge(debiti, carcom[, c("NQUEST", "PESOFIT")], by = "NQUEST", all.x = TRUE)
 
 debiti$RATADEB = debiti$RATADEB*debiti$PESOFIT
@@ -100,6 +98,7 @@ debiti = debiti %>% rename("tot_rate_pagate" = RATADEB)
 
 debiti$RATAEB_RES = debiti$RATADEB_RES*debiti$PESOFIT
 debiti = debiti %>% rename("tot_rate_res" = RATADEB_RES)
+
 
 debiti$RATAEB_AIMM = debiti$RATADEB_AIMM*debiti$PESOFIT
 debiti = debiti %>% rename("tot_rate_altri_immobili" = RATADEB_AIMM)
@@ -112,6 +111,7 @@ debiti = debiti %>% rename("tot_rate_fam" = RATADEB_FAM)
 debiti$RATAEB_PROF = debiti$RATADEB_PROF*debiti$PESOFIT
 debiti = debiti %>% rename("tot_rate_professione" = RATADEB_PROF)
 
+debiti$PFIMM = debiti$PFIMM*debiti$PESOFIT
 debiti = debiti %>% rename("deb_res_immobili" = PFIMM)
 
 debiti$PFCONS = debiti$PFCONS*debiti$PESOFIT
@@ -306,6 +306,10 @@ ggplot(con_deb) +
 ```
 Da questo grafico possiamo dire che tendenzialmente non c'è una correlazione tra eta media e debito residuo, ma forse possiamo dire che 
 
+```{r}
+m1 = lm(tot_debito ~ eta_media, data = con_deb)
+summary(m1)
+```
 
 
 ```{r}
@@ -1661,6 +1665,7 @@ Q %>% reframe("Worker status" = Modalita, "Participation rate" = n_indeb_compl_p
 ```{r}
 Q %>% reframe("Worker status" = Modalita, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
 ```
+
 ```{r}
 df <- data.frame(
   Worker_Status = c("employee", "self-employed", "non-professional condition"),
@@ -1768,18 +1773,18 @@ null = lm(Indeb_tot_pond ~ 1, log_data)
 full = lm(Indeb_tot_pond ~ ., log_data)
 step(full, scope = list(lower = null, upper = full), direction = "backward", k = 2, trace = 1)
 ```
+
 ```{r}
 model_tot = lm(formula = Indeb_tot_pond ~ ETA + NCOMP + NPERL + ACOM4C + W_pond + Y_FAM_pond, data = log_data)
 summary(model_tot)
 ```
+
 ```{r}
 jtools::summ(model_tot)
 ```
+
 ```{r}
 plot(model_tot)
 ```
-
-
-
 
 
