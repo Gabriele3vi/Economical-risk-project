@@ -1,0 +1,916 @@
+
+##############################################################
+```{r}
+TOT <- read.csv("E:/Dati_al_10.03.2024/Fam_Comp_Completo_PESOFIT/Fam_Comp_Completo_PESOFIT.csv", sep =";")
+```
+
+```{r}
+TOT[is.na(TOT)] <- 0
+TOT = TOT %>% filter(CFRED == 1)
+```
+
+```{r}
+imm = TOT %>% reframe(sum(PFIMM_pond))
+fam = TOT %>% reframe(sum(PFCONS_pond)+sum(PFCARTE_pond)+sum(PFCC_pond)+sum(PF3_pond))
+partecipazioni = TOT %>% reframe(sum(PFAZ_pond))
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+imm <- sum(TOT$PFIMM_pond)
+fam <- sum(TOT$PFCONS_pond) + sum(TOT$PFCARTE_pond) + sum(TOT$PFCC_pond) + sum(TOT$PF3_pond)
+partecipazioni <- sum(TOT$PFAZ_pond)
+
+data <- data.frame(
+  group = c("Residual debt for real estate purchase/renovation", "Residual familiar debt", "Outstanding debt for professional reasons"),
+  value = c(imm, fam, partecipazioni)
+)
+
+ggplot(data, aes(x = "", y = value, fill = group)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar("y", start = 0) +
+  theme_void() +
+  labs(fill = "Type of Debt") +
+  ggtitle("Total debt by type (2020)")
+
+```
+
+
+```{r}
+TOT %>% reframe(sum(PFIMM_pond) , sum(PFCONS_pond), sum(PFAZ_pond), sum(PFCARTE_pond), sum(PFCC_pond), sum(PF3_pond))
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+
+data <- data.frame(
+  group=c("Residual debt for real estate purchase/renovation", "Residual debt for consumer goods purchase", "Residual debt for professional reasons", "Credit card debt", "Overdraft on current accounts", "Debts owed to other families"
+),
+  value=c(106142886, 5311779, 22007891, 213081.2, 1228045, 2768980)
+)
+
+
+ggplot(data, aes(x="", y=value, fill=group)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+ 
+  theme_void() +
+  labs(fill = "Type of Debt") +
+  ggtitle("Total debt by type (2020)")
+```
+#### SPACCATURA PFCONS
+```{r}
+PFCONS <- read.csv("E:/Dati_al_12.03.2024/Unico_x_export_2020.csv", sep =";")
+```
+
+```{r}
+PFCONS = PFCONS %>% filter(Variabile == "SEX") %>% summarise(sum(sum_TDEBITA3_1_pond), sum(sum_TDEBITA3_2_pond), sum(sum_TDEBITA3_3_pond), sum(sum_TDEBITA3_4_pond), sum(sum_TDEBITA3_5_pond))
+```
+
+```{r}
+PFCONS
+```
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+
+data <- data.frame(
+  group=c("purchase of means of transportation (such as cars, motorcycles)", "purchase of other durable goods (such as electronics, furniture, appliances, etc.)", "purchase of non-durable goods (vacations, etc.)", "other purchases or daily expenses", "educational expenses (degree, master's)"
+),
+  value=c(3937130, 342597.3, 15099.69, 983277.5, 33674.36)
+)
+
+
+ggplot(data, aes(x="", y=value, fill=group)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+ 
+  theme_void() +
+  labs(fill = "Source of family needs debt") +
+  ggtitle("Family needs debt")
+```
+##Analysis based on characteristics of household head of the family
+```{r}
+TOT <- read.csv("E:/Dati_al_12.03.2024/Unico_x_export_2020.csv", sep =";")
+```
+
+```{r}
+SEX = TOT %>% filter(Variabile == "SEX")
+STUDIO = TOT %>% filter(Variabile == "STUDIO")
+SETT = TOT %>% filter(Variabile == "SETT")
+IREG = TOT %>% filter(Variabile == "IREG")
+ACOM5 = TOT %>% filter(Variabile == "ACOM5")
+QUAL = TOT %>% filter(Variabile == "QUAL")
+AREA5 = TOT %>% filter(Variabile == "AREA5")
+CLETA5 = TOT %>% filter(Variabile == "CLETA5")
+Q = TOT %>% filter(Variabile == "Q")
+```
+
+```{r}
+SEX$Modalita <- factor(SEX$Modalita,
+                  levels = c(1, 2),
+                  labels = c("man",
+                             "woman"))
+```
+
+```{r}
+data = SEX %>% reframe("Sex" = Modalita, "Participation rate" = n_indeb_compl_pond/freq_pond, "Indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+data
+```
+
+```{r}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+
+formatted_data <- data %>%
+  pivot_longer(cols = c("Indebted for real estate purchase", "Indebted for the purchase of consumer goods", 
+                        "Indebted for professional reasons", "Indebted to relatives/friends"),
+               names_to = "Debt_Type",
+               values_to = "Indebtedness") %>%
+  mutate(Sex = ifelse(Sex == "uomo", "Male", "Female"))
+
+
+ggplot(formatted_data, aes(x = Sex, y = Indebtedness, fill = Debt_Type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Sex", y = "Indebtedness", fill = "Debt Type") +
+  ggtitle("Indebtedness by Sex and Debt Type")
+
+```
+
+### Relative Residual Debt Allocation
+```{r}
+SEX %>% reframe("Sex" = Modalita, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond), "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond), "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond), "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond), "PFCC" = (sum_PFCC_pond/Deb_tot_pond), "PF3" = (sum_PF3_pond/Deb_tot_pond))
+```
+```{r}
+library(ggplot2)
+library(tidyr)
+
+# Provided dataframe
+df <- data.frame(
+  Sex = c("uomo", "donna"),
+  PFIMM = c(0.7746514, 0.7600687),
+  PFCONS = c(0.03985737, 0.03479411),
+  PFAZ = c(0.1527394, 0.1810098),
+  PFCARTE = c(0.001225747, 0.002504731),
+  PFCC = c(0.00824720, 0.01091977),
+  PF3 = c(0.02327884, 0.01070290)
+)
+
+# Reshape the data into long format
+df_long <- pivot_longer(df, cols = -Sex, names_to = "Variable", values_to = "Value")
+
+# Change the names of the values in the "Variable" column
+df_long$Variable <- factor(df_long$Variable, levels = c("PFIMM", "PFCONS", "PFAZ", "PFCARTE", "PFCC", "PF3"),
+                           labels = c("Residual debt for purchase/renovation of real estate", "Residual debt for the purchase of consumer goods", "Residual debt for professional reasons", "Residual debt on credit cards", "Overdraft on current accounts", "Residual debts owed to other households"))
+
+# Create the plot
+ggplot(data = df_long, aes(x = Sex, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Relative Residual Debt Allocation by Sex",
+       x = "Sex",
+       y = "Value") +
+  theme_minimal()
+
+```
+
+```{r}
+SEX %>% reframe("Sex" = Modalita, "Average value of debt" = Deb_tot_pond/n_indeb_compl_pond, "Debt over household wealth" = Deb_tot_pond/sum_W_indeb_pond, "Debt over household income" = Deb_tot_pond/sum_Y_FAM_indeb_pond)
+```
+```{r}
+SEX %>% reframe("Sex" = Modalita,
+                "Average duration (years) Indebtedness for primary residence" = Durata_Ori_pond_MUTUOIN1,
+                "Average number of suspensions Indebtedness for primary residence" = sum_MUTUOIN1_SOSPENS1,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN1,
+                "Weighted Mean Tax residential building" = Tasso_pond1,
+                "Average duration (years) Indebtedness for other properties" = Durata_Ori_pond_MUTUOIN2,
+                "Average number of suspensions Indebtedness for other properties" = sum_MUTUOIN2_SOSPENS2,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN2,
+                "Weighted Mean Tax other real estate" = Tasso_pond2,
+                "Average duration (years) Other debts for family needs" = Durata_Ori_pond_MUTUOIN3,
+                "Average number of suspensions Other debts for family needs" = sum_MUTUOIN3_SOSPENS3,
+                "Weighted Mean Tax family needs" = TAEG_pond3,
+                "Average duration (years) Debts for professional activity" = Durata_Ori_pond_MUTUOIN4,
+                "Weighted Mean Tax professional activity" = Tasso_pond4
+                )
+```
+
+LOAN to VALUE = valore del prestito sul valore ipoteca (su mutuo) [quanta parte è garantita]
+Lenders use the LTV ratio to assess the risk of providing a mortgage loan. A higher LTV ratio indicates that the borrower has less equity in the property and therefore represents a higher risk for the lender.
+
+
+#INDEBITAMENTO PER L’ABITAZIONE DI RESIDENZA
+```{r}
+STUDIO$Modalita <- factor(STUDIO$Modalita,
+                  levels = c(1, 2, 3, 4, 5, 6, 7, 8),
+                  labels = c("none","elementary school diploma","lower secondary school diploma","professional diploma (3 years)","upper secondary school diploma","university diploma/bachelor's degree", "degree/master's degree", "postgraduate specialization"))
+STUDIO
+```
+
+```{r}
+data = STUDIO %>% reframe("Education level" = Modalita, "Participation rate" = n_indeb_compl_pond/freq_pond, "Indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+data
+```
+### Relative Residual Debt Allocation
+```{r}
+STUDIO %>% reframe("Education level" = Modalita, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+
+```{r}
+df <- data.frame(
+  Education_Level = c("none","elementary school diploma","lower secondary school diploma","professional diploma (3 years)","upper secondary school diploma","university diploma/bachelor's degree", "degree/master's degree", "postgraduate specialization"),
+  PFIMM = c(61.42582, 23.23732, 65.04393, 72.29478, 77.09452, 93.78598, 85.71742, 79.95396),
+  PFCONS = c(33.079744, 7.093515, 4.616621, 8.209274, 4.352642, 3.082913, 2.170529, 3.262515),
+  PFAZ = c(0.000000, 65.805344, 25.670433, 14.721823, 15.321474, 2.790856, 10.526677, 12.165594),
+  PFCARTE = c(0.00000000, 0.03980068, 0.34211301, 0.20263760, 0.15175451, 0.11748142, 0.10510372, 0.03500135),
+  PFCC = c(0.00000000, 1.01084865, 1.12420714, 2.18672241, 0.87447723, 0.07084037, 0.74497769, 0.73917019)
+)
+
+library(ggplot2)
+library(tidyr)
+
+# Define the order of education levels
+education_order <- c("none","elementary school diploma","lower secondary school diploma","professional diploma (3 years)","upper secondary school diploma","university diploma/bachelor's degree", "degree/master's degree", "postgraduate specialization")
+
+# Convert Education_Level to factor with specified order
+df$Education_Level <- factor(df$Education_Level, levels = education_order)
+
+# Reshape the data into long format
+df_long <- pivot_longer(df, cols = -Education_Level, names_to = "Variable", values_to = "Value")
+
+df_long$Variable <- factor(df_long$Variable, levels = c("PFIMM", "PFCONS", "PFAZ", "PFCARTE", "PFCC", "PF3"),
+                           labels = c("Residual debt for purchase/renovation of real estate", "Residual debt for the purchase of consumer goods", "Residual debt for professional reasons", "Residual debt on credit cards", "Overdraft on current accounts", "Residual debts owed to other households"))
+
+# Create the grouped bar plot with adjusted width
+ggplot(data = df_long, aes(x = Education_Level, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Relative Residual Debt Allocation by Education Level",
+       x = "Education Level",
+       y = "Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+
+```{r}
+STUDIO %>% reframe("Education level" = Modalita, "Average value of debt" = Deb_tot_pond/n_indeb_compl_pond, "Debt over household wealth" = Deb_tot_pond/sum_W_indeb_pond, "Debt over household income" = Deb_tot_pond/sum_Y_FAM_indeb_pond)
+```
+```{r}
+STUDIO %>% reframe("Education level" = Modalita,
+                  "Average duration (years) Indebtedness for primary residence" = Durata_Ori_pond_MUTUOIN1,
+                "Average number of suspensions Indebtedness for primary residence" = sum_MUTUOIN1_SOSPENS1,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN1,
+                "Weighted Mean Tax residential building" = Tasso_pond1,
+                "Average duration (years) Indebtedness for other properties" = Durata_Ori_pond_MUTUOIN2,
+                "Average number of suspensions Indebtedness for other properties" = sum_MUTUOIN2_SOSPENS2,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN2,
+                "Weighted Mean Tax other real estate" = Tasso_pond2,
+                "Average duration (years) Other debts for family needs" = Durata_Ori_pond_MUTUOIN3,
+                "Average number of suspensions Other debts for family needs" = sum_MUTUOIN3_SOSPENS3,
+                "Weighted Mean Tax family needs" = TAEG_pond3,
+                "Average duration (years) Debts for professional activity" = Durata_Ori_pond_MUTUOIN4,
+                "Weighted Mean Tax professional activity" = Tasso_pond4
+                )
+                
+```
+
+
+
+```{r}
+SETT$Modalita <- factor(SETT$Modalita,
+                  levels = c(1, 2, 3, 4, 5),
+                  labels = c("agriculture",
+                             "industry",
+                             "public services",
+                             "other sectors",
+                             "none"))
+SETT
+```
+```{r}
+SETT %>% reframe("Sector" = Modalita, "Participation rate" = n_indeb_compl_pond/freq_pond, "Indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+### PERCENTAGES by category of debt (in terms of total value of residual debt)
+```{r}
+SETT %>% reframe("Sector" = Modalita, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+```{r}
+df <- data.frame(
+  Sector = c("agriculture",
+                             "industry",
+                             "public services",
+                             "other sectors",
+                             "none"),
+  PFIMM = c(45.84005, 81.22453, 82.81169, 79.94146, 55.32840),
+  PFCONS = c(1.235083, 4.564621, 4.434198, 3.187825, 9.980634),
+  PFAZ = c(51.495771, 8.056295, 11.339217, 14.786204, 22.378737),
+  PFCARTE = c(0.02013035, 0.17140601, 0.17892247, 0.10188922, 0.69119103),
+  PFCC = c(0.7996218, 1.1374775, 0.8963161, 0.7735587, 1.6942111),
+  PF3 = c(0.6093480, 4.8456685, 0.3396559, 1.2090601, 9.9268300)
+)
+library(ggplot2)
+library(tidyr)
+
+# Reshape the data into long format
+df_long <- pivot_longer(df, cols = -Sector, names_to = "Variable", values_to = "Value")
+
+df_long$Variable <- factor(df_long$Variable, levels = c("PFIMM", "PFCONS", "PFAZ", "PFCARTE", "PFCC", "PF3"),
+                           labels = c("Residual debt for purchase/renovation of real estate", "Residual debt for the purchase of consumer goods", "Residual debt for professional reasons", "Residual debt on credit cards", "Overdraft on current accounts", "Residual debts owed to other households"))
+
+# Create the grouped bar plot with adjusted width
+ggplot(data = df_long, aes(x = Sector, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Relative Residual Debt Allocation by Sector",
+       x = "Sector",
+       y = "Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+SETT %>% reframe("Sector" = Modalita, "Average value of debt" = Deb_tot_pond/n_indeb_compl_pond, "Debt over household wealth" = Deb_tot_pond/sum_W_indeb_pond, "Debt over household income" = Deb_tot_pond/sum_Y_FAM_indeb_pond)
+```
+```{r}
+SETT %>% reframe("Sector" = Modalita,
+                "Average duration (years) Indebtedness for primary residence" = Durata_Ori_pond_MUTUOIN1,
+                "Average number of suspensions Indebtedness for primary residence" = sum_MUTUOIN1_SOSPENS1,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN1,
+                "Weighted Mean Tax residential building" = Tasso_pond1,
+                "Average duration (years) Indebtedness for other properties" = Durata_Ori_pond_MUTUOIN2,
+                "Average number of suspensions Indebtedness for other properties" = sum_MUTUOIN2_SOSPENS2,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN2,
+                "Weighted Mean Tax other real estate" = Tasso_pond2,
+                "Average duration (years) Other debts for family needs" = Durata_Ori_pond_MUTUOIN3,
+                "Average number of suspensions Other debts for family needs" = sum_MUTUOIN3_SOSPENS3,
+                "Weighted Mean Tax family needs" = TAEG_pond3,
+                "Average duration (years) Debts for professional activity" = Durata_Ori_pond_MUTUOIN4,
+                "Weighted Mean Tax professional activity" = Tasso_pond4
+                )
+```
+
+```{r}
+IREG$Modalita <- factor(IREG$Modalita,
+                  levels = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20),
+                  labels = c("Piemonte",
+                             "Valle d'Aosta",
+                             "Lombardia",
+                             "Trentino",
+                             "Veneto",
+                             "Friuli",
+                             "Liguria",
+                             "Emilia Romagna",
+                             "Toscana",
+                             "Umbria",
+                             "Marche",
+                             "Lazio",
+                             "Abruzzo",
+                             "Molise",
+                             "Campania",
+                             "Puglia",
+                             "Basilicata",
+                             "Calabria",
+                             "Sicilia",
+                             "Sardegna"))
+```
+
+```{r}
+IREG %>% reframe("Region" = Modalita, "Participation rate" = n_indeb_compl_pond/freq_pond, "Indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+IREG %>% reframe("Region" = Modalita, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond), "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond), "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond), "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond), "PFCC" = (sum_PFCC_pond/Deb_tot_pond), "PF3" = (sum_PF3_pond/Deb_tot_pond))
+```
+```{r}
+library(knitr)
+
+IREG_formatted <- IREG %>%
+  reframe("Region" = Modalita, 
+          "Residual debt for purchase/renovation of real estate" = (sum_PFIMM_pond/Deb_tot_pond), 
+          "Residual debt for the purchase of consumer goods" = (sum_PFCONS_pond/Deb_tot_pond), 
+          "Residual debt for professional reasons" = (sum_PFAZ_pond/Deb_tot_pond), 
+          "Residual debt on credit cards" = (sum_PFCARTE_pond/Deb_tot_pond), 
+          "Overdraft on current accounts" = (sum_PFCC_pond/Deb_tot_pond), 
+          "Residual debts owed to other households" = (sum_PF3_pond/Deb_tot_pond))
+
+# Display the formatted dataframe
+kable(IREG_formatted)
+
+```
+
+
+```{r}
+df <- data.frame(
+  Region = c("Piemonte", "Valle d'Aosta", "Lombardia", "Trentino", "Veneto", "Friuli", "Liguria", "Emilia Romagna", "Toscana", "Umbria", "Marche", "Lazio", "Abruzzo", "Molise", "Campania", "Puglia", "Basilicata", "Calabria", "Sicilia", "Sardegna"),
+  PFIMM = c(77.57827, 38.54360, 87.54612, 62.29306, 62.55560, 76.06365, 58.53544, 88.39889, 85.62389, 74.07862, 49.78589, 93.49773, 79.27753, 95.44464, 88.90505, 77.45509, 36.33227, 33.76405, 73.66717, 84.99123),
+  PFCONS = c(3.212594, 3.374608, 2.560587, 1.941463, 1.834370, 4.844799, 3.677448, 3.769656, 3.421649, 11.290341, 3.152899, 3.634692, 2.743299, 2.968998, 6.446431, 4.349069, 14.351020, 9.160658, 10.877907, 5.638994),
+  PFAZ = c(17.3751633, 56.5231533, 6.3215259, 34.1880914, 31.0179402, 18.2503654, 36.9192457, 6.4815449, 8.6753232, 11.5820055, 40.3819939, 1.7467416, 15.4583099, 0.5062402, 2.2981188, 12.6225453, 38.1885649, 6.2272173, 12.6047966, 7.1740398),
+  PFCARTE = c(0.110965114, 0.523608310, 0.042280982, 0.006690263, 0.122946315, 0.021999134, 0.046602344, 0.086131048, 0.167715009, 0.148883852, 0.104413697, 0.054308446, 0.000000000, 0.555481164, 0.456493864, 0.550037577, 0.314285915, 3.244366301, 0.274250077, 0.788620626),
+  PFCC = c(0.9652154, 0.0000000, 0.6028152, 1.5487990, 0.5743230, 0.8191893, 0.8212665, 1.2550176, 0.5318537, 0.7108706, 0.9599228, 0.7760068, 1.9662816, 0.5246382, 1.4778821, 2.0210130, 4.2529991, 1.3492302, 1.7913925, 0.8735886)
+)
+
+library(ggplot2)
+library(tidyr)
+
+# Convert Region to factor with ordered levels from north to south
+df$Region <- factor(df$Region, levels = c("Piemonte", "Valle d'Aosta", "Lombardia", "Trentino", "Veneto", "Friuli", "Liguria", "Emilia Romagna", "Toscana", "Umbria", "Marche", "Lazio", "Abruzzo", "Molise", "Campania", "Puglia", "Basilicata", "Calabria", "Sicilia", "Sardegna"))
+
+# Reshape the data into long format
+df_long <- pivot_longer(df, cols = -Region, names_to = "Variable", values_to = "Value")
+
+df_long$Variable <- factor(df_long$Variable, levels = c("PFIMM", "PFCONS", "PFAZ", "PFCARTE", "PFCC"),
+                           labels = c("Residual debt for purchase/renovation of real estate", "Residual debt for the purchase of consumer goods", "Residual debt for professional reasons", "Residual debt on credit cards", "Overdraft on current accounts"))
+
+# Create the grouped bar plot with adjusted width and larger plot size
+ggplot(data = df_long, aes(x = Region, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 1.5)) +
+  labs(title = "Relative Residual Debt Allocation by Region",
+       x = "Region",
+       y = "Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+```{r}
+IREG %>% reframe("Region" = Modalita, "Average value of debt" = Deb_tot_pond/n_indeb_compl_pond, "Debt over household wealth" = Deb_tot_pond/sum_W_indeb_pond, "Debt over household income" = Deb_tot_pond/sum_Y_FAM_indeb_pond)
+```
+
+```{r}
+IREG %>% reframe("Region" = Modalita,
+                  "Average duration (years) Indebtedness for primary residence" = Durata_Ori_pond_MUTUOIN1,
+                "Average number of suspensions Indebtedness for primary residence" = sum_MUTUOIN1_SOSPENS1,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN1,
+                "Weighted Mean Tax residential building" = Tasso_pond1,
+                "Average duration (years) Indebtedness for other properties" = Durata_Ori_pond_MUTUOIN2,
+                "Average number of suspensions Indebtedness for other properties" = sum_MUTUOIN2_SOSPENS2,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN2,
+                "Weighted Mean Tax other real estate" = Tasso_pond2,
+                "Average duration (years) Other debts for family needs" = Durata_Ori_pond_MUTUOIN3,
+                "Average number of suspensions Other debts for family needs" = sum_MUTUOIN3_SOSPENS3,
+                "Weighted Mean Tax family needs" = TAEG_pond3,
+                "Average duration (years) Debts for professional activity" = Durata_Ori_pond_MUTUOIN4,
+                "Weighted Mean Tax professional activity" = Tasso_pond4
+                )
+```
+
+
+#ACOM5 = ampiezza demografica del comune
+```{r}
+ACOM5$Modalita <- factor(ACOM5$Modalita,
+                  levels = c(1, 2, 3, 4, 5),
+                  labels = c("up to 5.000 inhabitants",
+                             "5.000-20.000",
+                             "20.000-50.000",
+                             "50.000-200.000",
+                             "over 200.000"
+))
+```
+
+```{r}
+ACOM5 %>% reframe("Demographic size of the municipality" = Modalita, "Participation rate" = n_indeb_compl_pond/freq_pond, "Indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+ACOM5 %>% reframe("Demographic size of the municipality" = Modalita, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+```{r}
+df <- data.frame(
+  Municipality_Size = c("up to 5.000 inhabitants",
+                        "5.000-20.000",
+                        "20.000-50.000",
+                        "50.000-200.000",
+                        "over 200.000"),
+  PFIMM = c(76.05008, 75.35718, 66.62738, 77.49791, 87.48584),
+  PFCONS = c(15.188222, 4.079181, 3.231837, 4.338393, 2.320720),
+  PFAZ = c(4.948312, 13.112973, 28.276383, 14.549183, 9.108661),
+  PFCARTE = c(1.10730191, 0.12783607, 0.12544677, 0.15652268, 0.05776439),
+  PFCC = c(2.3567059, 1.3487888, 0.7790674, 1.0246546, 0.4235607)
+)
+
+library(ggplot2)
+library(tidyr)
+
+# Convert Municipality_Size to factor with original order
+df$Municipality_Size <- factor(df$Municipality_Size, levels = df$Municipality_Size)
+
+# Reshape the data into long format
+df_long <- pivot_longer(df, cols = -Municipality_Size, names_to = "Variable", values_to = "Value")
+
+df_long$Variable <- factor(df_long$Variable, levels = c("PFIMM", "PFCONS", "PFAZ", "PFCARTE", "PFCC"),
+                           labels = c("Residual debt for purchase/renovation of real estate", "Residual debt for the purchase of consumer goods", "Residual debt for professional reasons", "Residual debt on credit cards", "Overdraft on current accounts"))
+
+# Create the grouped bar plot with adjusted width
+ggplot(data = df_long, aes(x = Municipality_Size, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Relative Residual Debt Allocation by Municipality Size",
+       x = "Municipality Size",
+       y = "Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+```{r}
+ACOM5 %>% reframe("Demographic size of the municipality" = Modalita, "Average value of debt" = Deb_tot_pond/n_indeb_compl_pond, "Debt over household wealth" = Deb_tot_pond/sum_W_indeb_pond, "Debt over household income" = Deb_tot_pond/sum_Y_FAM_indeb_pond)
+```
+
+```{r}
+ACOM5 %>% reframe("Demographic size of the municipality" = Modalita,
+                  "Average duration (years) Indebtedness for primary residence" = Durata_Ori_pond_MUTUOIN1,
+                "Average number of suspensions Indebtedness for primary residence" = sum_MUTUOIN1_SOSPENS1,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN1,
+                "Weighted Mean Tax residential building" = Tasso_pond1,
+                "Average duration (years) Indebtedness for other properties" = Durata_Ori_pond_MUTUOIN2,
+                "Average number of suspensions Indebtedness for other properties" = sum_MUTUOIN2_SOSPENS2,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN2,
+                "Weighted Mean Tax other real estate" = Tasso_pond2,
+                "Average duration (years) Other debts for family needs" = Durata_Ori_pond_MUTUOIN3,
+                "Average number of suspensions Other debts for family needs" = sum_MUTUOIN3_SOSPENS3,
+                "Weighted Mean Tax family needs" = TAEG_pond3,
+                "Average duration (years) Debts for professional activity" = Durata_Ori_pond_MUTUOIN4,
+                "Weighted Mean Tax professional activity" = Tasso_pond4
+                )
+```
+```{r}
+ACOM5 %>% reframe("Demographic size of the municipality" = Modalita,
+                "Weighted Mean Tax residential building" = Tasso_pond1
+                )
+```
+
+
+
+#QUAL = status del lavoratore
+```{r}
+QUAL$Modalita <- factor(QUAL$Modalita,
+                  levels = c(1, 2, 3, 4, 5, 6, 7),
+                  labels = c("worker",
+"employee",
+"manager/executive",
+"entrepreneur/self-employed professional",
+"other self-employed",
+"retired",
+"other unemployed"
+))
+```
+
+### number of individuals indebted
+```{r}
+QUAL %>% reframe("Worker status" = Modalita, "Participation rate" = n_indeb_compl_pond/freq_pond, "Indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+### PERCENTAGES by category of debt (in terms of total value of residual debt)
+```{r}
+QUAL %>% reframe("Worker status" = Modalita, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+```{r}
+df <- data.frame(
+  Worker_Status = c("worker",
+"employee",
+"manager/executive",
+"entrepreneur/self-employed professional",
+"other self-employed",
+"retired",
+"other unemployed"),
+  PFIMM = c(82.92112, 94.02920, 94.62955, 61.87915, 55.10800, 52.09258, 79.81840),
+  PFCONS = c(7.459770, 3.707295, 2.723480, 1.845715, 3.879250, 10.787161, 3.876506),
+  PFAZ = c(6.887518, 0.648127, 0.137398, 33.382897, 38.855779, 24.596892, 5.590811),
+  PFCARTE = c(0.14867413, 0.13740605, 0.05197579, 0.12185587, 0.13861708, 0.77877209, 0.02834097),
+  PFCC = c(0.7343484, 0.6924752, 0.5023233, 0.9506809, 1.7171213, 1.5740843, 2.6033809)
+)
+
+
+library(ggplot2)
+library(tidyr)
+
+# Reshape the data into long format
+df_long <- pivot_longer(df, cols = -Worker_Status, names_to = "Variable", values_to = "Value")
+
+df_long$Variable <- factor(df_long$Variable, levels = c("PFIMM", "PFCONS", "PFAZ", "PFCARTE", "PFCC", "PF3"),
+                           labels = c("Residual debt for purchase/renovation of real estate", "Residual debt for the purchase of consumer goods", "Residual debt for professional reasons", "Residual debt on credit cards", "Overdraft on current accounts", "Residual debts owed to other households"))
+
+# Create the grouped bar plot with adjusted width
+ggplot(data = df_long, aes(x = Worker_Status, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Relative Residual Debt Allocation by Worker Status",
+       x = "Worker Status",
+       y = "Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+```{r}
+QUAL %>% reframe("Worker status" = Modalita, "Average value of debt" = Deb_tot_pond/n_indeb_compl_pond, "Debt over household wealth" = Deb_tot_pond/sum_W_indeb_pond, "Debt over household income" = Deb_tot_pond/sum_Y_FAM_indeb_pond)
+```
+
+```{r}
+QUAL %>% reframe("Worker status" = Modalita,
+                 "Average duration (years) Indebtedness for primary residence" = Durata_Ori_pond_MUTUOIN1,
+                "Average number of suspensions Indebtedness for primary residence" = sum_MUTUOIN1_SOSPENS1,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN1,
+                "Weighted Mean Tax residential building" = Tasso_pond1,
+                "Average duration (years) Indebtedness for other properties" = Durata_Ori_pond_MUTUOIN2,
+                "Average number of suspensions Indebtedness for other properties" = sum_MUTUOIN2_SOSPENS2,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN2,
+                "Weighted Mean Tax other real estate" = Tasso_pond2,
+                "Average duration (years) Other debts for family needs" = Durata_Ori_pond_MUTUOIN3,
+                "Average number of suspensions Other debts for family needs" = sum_MUTUOIN3_SOSPENS3,
+                "Weighted Mean Tax family needs" = TAEG_pond3,
+                "Average duration (years) Debts for professional activity" = Durata_Ori_pond_MUTUOIN4,
+                "Weighted Mean Tax professional activity" = Tasso_pond4
+                )
+```
+
+#AREA5 = area geografica
+```{r}
+AREA5$Modalita <- factor(AREA5$Modalita,
+                  levels = c(1, 2, 3, 4, 5),
+                  labels = c("Northwest", "Northeast", "Center", "South", "Islands"
+))
+```
+
+```{r}
+AREA5 %>% reframe("Regional area" = Modalita, "Participation rate" = n_indeb_compl_pond/freq_pond, "Indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+AREA5 %>% reframe("Regional area" = Modalita, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+```{r}
+df <- data.frame(
+  Regional_Area = c("Northwest", "Northeast", "Center", "South", "Islands"),
+  PFIMM = c(79.21144, 69.84424, 82.02840, 76.86216, 79.29816),
+  PFCONS = c(2.905396, 2.619103, 5.438366, 5.580587, 8.272813),
+  PFAZ = c(15.188267, 24.854179, 10.036455, 9.195358, 9.904306),
+  PFCARTE = c(0.08000387, 0.07416655, 0.12091444, 0.67076838, 0.53002523),
+  PFCC = c(0.6984800, 1.0069640, 0.6935992, 1.7368423, 1.3350067),
+  PF3 = c(1.9164132, 1.6013512, 1.6822672, 5.9542885, 0.6596931)
+)
+
+
+library(ggplot2)
+library(tidyr)
+
+# Reshape the data into long format
+df_long <- pivot_longer(df, cols = -Regional_Area, names_to = "Variable", values_to = "Value")
+
+df_long$Variable <- factor(df_long$Variable, levels = c("PFIMM", "PFCONS", "PFAZ", "PFCARTE", "PFCC", "PF3"),
+                           labels = c("Residual debt for purchase/renovation of real estate", "Residual debt for the purchase of consumer goods", "Residual debt for professional reasons", "Residual debt on credit cards", "Overdraft on current accounts", "Residual debts owed to other households"))
+
+# Create the grouped bar plot with adjusted width
+ggplot(data = df_long, aes(x = Regional_Area, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Relative Residual Debt Allocation by Regional Area",
+       x = "Regional Area",
+       y = "Value") +
+  theme_minimal()
+
+```
+```{r}
+AREA5 %>% reframe("Regional area" = Modalita, "Average value of debt" = Deb_tot_pond/n_indeb_compl_pond, "Debt over household wealth" = Deb_tot_pond/sum_W_indeb_pond, "Debt over household income" = Deb_tot_pond/sum_Y_FAM_indeb_pond)
+```
+
+```{r}
+AREA5 %>% reframe("Regional area" = Modalita,
+                  "Average duration (years) Indebtedness for primary residence" = Durata_Ori_pond_MUTUOIN1,
+                "Average number of suspensions Indebtedness for primary residence" = sum_MUTUOIN1_SOSPENS1,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN1,
+                "Weighted Mean Tax residential building" = Tasso_pond1,
+                "Average duration (years) Indebtedness for other properties" = Durata_Ori_pond_MUTUOIN2,
+                "Average number of suspensions Indebtedness for other properties" = sum_MUTUOIN2_SOSPENS2,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN2,
+                "Weighted Mean Tax other real estate" = Tasso_pond2,
+                "Average duration (years) Other debts for family needs" = Durata_Ori_pond_MUTUOIN3,
+                "Average number of suspensions Other debts for family needs" = sum_MUTUOIN3_SOSPENS3,
+                "Weighted Mean Tax family needs" = TAEG_pond3,
+                "Average duration (years) Debts for professional activity" = Durata_Ori_pond_MUTUOIN4,
+                "Weighted Mean Tax professional activity" = Tasso_pond4
+                )
+```
+#CLETA5 = classe di età (1=fino a 34 anni, 2=35-44, 3=45-54, 4=55-64, 5=oltre 64)
+```{r}
+CLETA5$Modalita <- factor(CLETA5$Modalita,
+                 levels = c(1, 2, 3, 4, 5),
+                 labels = c("up to 34 anni", "from 35 to 44", "from 45 to 54", "from 55 to 64", "over 64"))
+```
+
+```{r}
+CLETA5 %>% reframe("Age classes" = Modalita, "Participation rate" = n_indeb_compl_pond/freq_pond, "Indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+CLETA5 %>% reframe("Age classes" = Modalita, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond)*100, "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond)*100, "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond)*100, "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond)*100, "PFCC" = (sum_PFCC_pond/Deb_tot_pond)*100, "PF3" = (sum_PF3_pond/Deb_tot_pond)*100)
+```
+```{r}
+df <- data.frame(
+  Age_Class = c("up to 34 anni", "from 35 to 44", "from 45 to 54", "from 55 to 64", "over 64"),
+  PFIMM = c(80.76110, 87.59380, 77.94134, 69.00114, 37.93922),
+  PFCONS = c(2.360478, 3.137253, 3.908473, 4.366676, 8.023833),
+  PFAZ = c(15.277728, 7.174385, 16.174041, 21.479753, 44.066076),
+  PFCARTE = c(0.08009929, 0.04635285, 0.17293647, 0.31280235, 0.30100385),
+  PFCC = c(0.7480828, 0.3373195, 0.7789715, 1.9119563, 1.7716161),
+  PF3 = c(0.7725156, 1.7108852, 1.0242368, 2.9276720, 7.8982556)
+)
+
+library(ggplot2)
+library(tidyr)
+
+# Reshape the data into long format
+df_long <- pivot_longer(df, cols = -Age_Class, names_to = "Variable", values_to = "Value")
+
+df_long$Variable <- factor(df_long$Variable, levels = c("PFIMM", "PFCONS", "PFAZ", "PFCARTE", "PFCC", "PF3"),
+                           labels = c("Residual debt for purchase/renovation of real estate", "Residual debt for the purchase of consumer goods", "Residual debt for professional reasons", "Residual debt on credit cards", "Overdraft on current accounts", "Residual debts owed to other households"))
+
+original_order <- c("up to 34 anni", "from 35 to 44", "from 45 to 54", "from 55 to 64", "over 64")
+
+# Convert Age_Class to a factor with the original order
+df_long$Age_Class <- factor(df_long$Age_Class, levels = original_order)
+
+# Create the grouped bar plot
+ggplot(data = df_long, aes(x = Age_Class, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Relative Residual Debt Allocation by Age Class",
+       x = "Age Class",
+       y = "Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+```{r}
+CLETA5 %>% reframe("Age classes" = Modalita, "Average value of debt" = Deb_tot_pond/n_indeb_compl_pond, "Debt over household wealth" = Deb_tot_pond/sum_W_indeb_pond, "Debt over household income" = Deb_tot_pond/sum_Y_FAM_indeb_pond)
+```
+
+
+```{r}
+CLETA5 %>% reframe("Age classes" = Modalita,
+                  "Average duration (years) Indebtedness for primary residence" = Durata_Ori_pond_MUTUOIN1,
+                "Average number of suspensions Indebtedness for primary residence" = sum_MUTUOIN1_SOSPENS1,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN1,
+                "Weighted Mean Tax residential building" = Tasso_pond1,
+                "Average duration (years) Indebtedness for other properties" = Durata_Ori_pond_MUTUOIN2,
+                "Average number of suspensions Indebtedness for other properties" = sum_MUTUOIN2_SOSPENS2,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN2,
+                "Weighted Mean Tax other real estate" = Tasso_pond2,
+                "Average duration (years) Other debts for family needs" = Durata_Ori_pond_MUTUOIN3,
+                "Average number of suspensions Other debts for family needs" = sum_MUTUOIN3_SOSPENS3,
+                "Weighted Mean Tax family needs" = TAEG_pond3,
+                "Average duration (years) Debts for professional activity" = Durata_Ori_pond_MUTUOIN4,
+                "Weighted Mean Tax professional activity" = Tasso_pond4
+                )
+```
+#Q = status del lavoratore (1=dipendente, 2=autonomo, 3=condiz. non professionale)
+```{r}
+Q$Modalita <- factor(Q$Modalita,
+                 levels = c(1, 2, 3),
+                 labels = c("employee", "self-employed", "non-professional condition"
+))
+```
+
+```{r}
+Q %>% reframe("Worker status" = Modalita, "Participation rate" = n_indeb_compl_pond/freq_pond, "Indebted for real estate purchase" = (n_indeb_imm_pond/freq_pond), "Indebted for the purchase of consumer goods" = (n_indeb_cons_pond/freq_pond), "Indebted for professional reasons" = n_indeb_az_pond/freq_pond, "Indebted to relatives/friends" = n_indeb_3_pond/freq_pond)
+```
+
+```{r}
+Q %>% reframe("Worker status" = Modalita, "PFIMM" = (sum_PFIMM_pond/Deb_tot_pond), "PFCONS" = (sum_PFCONS_pond/Deb_tot_pond), "PFAZ" = (sum_PFAZ_pond/Deb_tot_pond), "PFCARTE" = (sum_PFCARTE_pond/Deb_tot_pond), "PFCC" = (sum_PFCC_pond/Deb_tot_pond), "PF3" = (sum_PF3_pond/Deb_tot_pond))
+```
+```{r}
+df <- data.frame(
+  Worker_Status = c("employee", "self-employed", "non-professional condition"),
+  PFIMM = c(91.62193, 60.45905, 55.32840),
+  PFCONS = c(4.259105, 2.272204, 9.980634),
+  PFAZ = c(1.94221, 34.53071, 22.37874),
+  PFCARTE = c(0.1114586, 0.1253712, 0.6911910),
+  PFCC = c(0.638664, 1.111425, 1.694211),
+  PF3 = c(1.426630, 1.501238, 9.926830)
+)
+
+
+# Reshape the data into long format
+df_long <- pivot_longer(df, cols = -Worker_Status, names_to = "Variable", values_to = "Value")
+
+df_long$Variable <- factor(df_long$Variable, levels = c("PFIMM", "PFCONS", "PFAZ", "PFCARTE", "PFCC", "PF3"),
+                           labels = c("Residual debt for purchase/renovation of real estate", "Residual debt for the purchase of consumer goods", "Residual debt for professional reasons", "Residual debt on credit cards", "Overdraft on current accounts", "Residual debts owed to other households"))
+
+# Create the grouped bar plot
+ggplot(data = df_long, aes(x = Worker_Status, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Relative Residual Debt Allocation by Status of the worker",
+       x = "Worker status",
+       y = "Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+```{r}
+Q %>% reframe("Worker status" = Modalita, "Average value of debt" = Deb_tot_pond/n_indeb_compl_pond, "Debt over household wealth" = Deb_tot_pond/sum_W_indeb_pond, "Debt over household income" = Deb_tot_pond/sum_Y_FAM_indeb_pond)
+```
+```{r}
+Q %>% reframe("Worker status" = Modalita,
+               "Average duration (years) Indebtedness for primary residence" = Durata_Ori_pond_MUTUOIN1,
+                "Average number of suspensions Indebtedness for primary residence" = sum_MUTUOIN1_SOSPENS1,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN1,
+                "Weighted Mean Tax residential building" = Tasso_pond1,
+                "Average duration (years) Indebtedness for other properties" = Durata_Ori_pond_MUTUOIN2,
+                "Average number of suspensions Indebtedness for other properties" = sum_MUTUOIN2_SOSPENS2,
+                "Loan-to-Value Indebtedness for primary residence" = LTV1_pond_MUTUOIN2,
+                "Weighted Mean Tax other real estate" = Tasso_pond2,
+                "Average duration (years) Other debts for family needs" = Durata_Ori_pond_MUTUOIN3,
+                "Average number of suspensions Other debts for family needs" = sum_MUTUOIN3_SOSPENS3,
+                "Weighted Mean Tax family needs" = TAEG_pond3,
+                "Average duration (years) Debts for professional activity" = Durata_Ori_pond_MUTUOIN4,
+                "Weighted Mean Tax professional activity" = Tasso_pond4
+                )
+```
+
+```{r}
+TOT <- read.csv("E:/Dati_al_10.03.2024/Fam_Comp_Completo_PESOFIT/Fam_Comp_Completo_PESOFIT.csv", sep =";")
+```
+
+```{r}
+TOT[is.na(TOT)] <- 0
+TOT = TOT %>% filter(CFRED == 1)
+```
+
+```{r}
+lda_model = lda(Flg_indeb_compl~Y_FAM_pond, data = TOT)
+```
+
+```{r}
+plot(lda_model)
+```
+```{r}
+source("E:/Dati_al_12.03.2024/inference.R")
+```
+
+```{r}
+attach(TOT)
+inference(y = Y_FAM_pond, x = Flg_indeb_compl, est = "mean", type = "ht", null = 0, alternative = "twosided", method = "theoretical")
+```
+```{r}
+model1 = lm(Indeb_tot_pond ~ SEX, data = TOT)
+summary(model1)
+```
+```{r}
+logit_model = glm(Indeb_tot_pond ~ NPERL + ETA + NCOMP + STUDIO, data = TOT)
+summary(logit_model)
+```
+
+(1) age: x1 - age of the household head [years]; 
+(2) gender: x2 - household head gender [female = 1, male = 0]; 
+(3) education: because the first of the variables considered referring to the level of household education has several variants, a reference group was distinguished (for variables x3-x6) - households with at most basic education; x3 - basic vocational [yes = 1, no = 0]; x4 - medium [yes = 1, no = 0]; x5- college [yes = 1, no = 0]; x6 - higher [yes = 1, no = 0]; x7 - economic education of the household head [yes = 1, no = 0]; 
+(4) number and composition of the household: x8 - number of members of the household [persons]; x9 - share of dependent children [%]; 
+(5) economic activity of household members: x10 - share of household members engaged in gainful employment in the total number of people in the household [%]; 
+(6) household development phase: because the variable in question has several variants, a reference group has been identified - the farm of a lonely young person; x11 - young marriage / partnership without a child [yes = 1, no = 0]; x12 - a lonely person with a dependent child / children [yes = 1, no = 0]; x13 - marriage / partnership with dependent children [yes = 1, no = 0]; x14 - marriage / partnership in middle or older age without dependent children [yes = 1, no = 0]; x15 - the management of a lonely elderly person [yes = 1, no = 0]; x16 - other than the development phase (including multi-generational households) [yes = 1, no = 0]; (7) socioeconomic type of household: because the variable in question has several variants, a reference group has been identified - the household of employees; x17 - farmers [yes = 1, no = 0]; x18 - self-employed [yes = 1, no = 0]; x19 - pensioners [yes = 1, no = 0]; x20 - other (including those living on social benefits) [yes = 1, no = 0]; 
+(8) household location: because the variable in question has several variants, a reference group has been identified - a village household; x21 - city up to 50,000 residents [yes = 1, no = 0]; x22 - a city of over 50,000 residents [yes = 1, no = 0]; 
+(9) household income: since the first of the variables adopted for household income has several variants, a reference group has been separated (for variables x23-x25) - average monthly net income per person in a household up to PLN 1,000; x23 - from 1001 to 1500 PLN / person [yes = 1, no = 0]; x24 - from 1501 to 2000 PLN / person [yes = 1, no = 0]; x25 - above PLN 2,000 / person [yes = 1, no = 0]; x26 - a steady increase in income since 2004 [yes = 1, no = 0]; x27 - diversification of sources of income in a household -
+more than one type of source of income [yes = 1, no = 0]; x28 - a steady increase in expenses since 2004 [yes = 1, no = 0]; x29 - share of expenditure on food and non-alcoholic beverages in household expenses [%]; x30 - have you ever encountered difficulties in accessing financial services or products [yes = 1, no = 0].
+
+```{r}
+TOT <- read.csv("E:/Dati_al_10.03.2024/Fam_Comp_Completo_PESOFIT/Fam_Comp_Completo_PESOFIT.csv", sep =";")
+```
+
+```{r}
+TOT[is.na(TOT)] <- 0
+TOT = TOT %>% filter(CFRED == 1)
+```
+
+```{r}
+log_data = TOT[, c("Indeb_tot_pond", "CLETA5", "SEX", "STUDIO", "NCOMP", "NPERL", "ACOM5", "Q", "W_pond", "Y_FAM_pond")]
+```
+
+```{r}
+vars_to_convert <- c("CLETA5", "SEX", "STUDIO", "NPERL", "NCOMP", "ACOM5", "Q")
+log_data <- log_data %>% mutate_at(vars(vars_to_convert), as.factor)
+```
+
+```{r}
+null = lm(Indeb_tot_pond ~ 1, log_data)
+full = lm(Indeb_tot_pond ~ ., log_data)
+step(full, scope = list(lower = null, upper = full), direction = "backward", k = 2, trace = 1)
+```
+
+
+```{r}
+model_tot = lm(formula = Indeb_tot_pond ~ CLETA5 + STUDIO + NCOMP + NPERL + ACOM5 + Q + W_pond + Y_FAM_pond, data = log_data)
+summary(model_tot)
+```
+```{r}
+jtools::summ(model_tot)
+```
+```{r}
+plot(model_tot)
+```
+
+
+
