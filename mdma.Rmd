@@ -13,13 +13,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # SETUP MAC
 ```{r}
-setwd("~/Desktop/Economical-risk-project")
+#setwd("~/Desktop/Economical-risk-project")
 ```
 
 # SETUP WINDOWS
 ```{r}
 # Qui dovete mettere il vostro path
 # setwd("~\Desktop\Economical-risk-project")
+
 ```
 
 ## carico Tidyverse
@@ -43,14 +44,16 @@ debiti_altri_immobili = read.csv("indagine_2020/alld2_aimm.csv")
 ## Caricamento dei dataset - WINDOWS
 ```{r}
 
-carcom = read.csv("indagine_2020\carcom20.csv")
-debiti =  read.csv("indagine_2020\debiti20.csv")
+carcom = read.csv("indagine_2020/carcom20.csv")
+debiti =  read.csv("indagine_2020/debiti20.csv")
 
-# Carico gli allegati
-debiti_residenza = read.csv("indagine_2020\alld2_res.csv")
-debiti_professione = read.csv("indagine_2020\alld2_prof.csv")
-debiti_famiglia = read.csv("indagine_2020\alld2_fam.csv")
-debiti_altri_immobili = read.csv("indagine_2020\alld2_aimm.csv")
+# Carico gli allegati 
+debiti_residenza = read.csv("indagine_2020/alld2_res.csv")
+debiti_professione = read.csv("indagine_2020/alld2_prof.csv")
+debiti_famiglia = read.csv("indagine_2020/alld2_fam.csv")
+debiti_altri_immobili = read.csv("indagine_2020/alld2_aimm.csv")
+
+carcom
 ```
 
 
@@ -473,6 +476,8 @@ ggplot(pfimm_area_geografica, aes(x = area_geografica, y = "", fill = mean)) +
   geom_tile() +
   scale_fill_gradient(low = "lightgreen", high = "darkgreen") +
   scale_x_discrete(labels = etichette_aree)
+
+# FARE BARPLOT
 ```
 
 ### REGIONE DI RESIDENZA
@@ -519,9 +524,7 @@ Provo a vedere se i debiti res professione sono normali come sembrano
 In primis ci salviamo da carcom solo le variabili utili per essere analizzate col debito, ed eliminiamo i doppioni.
 
 ```{r}
-carcom_pfaz = carcom %>% select(NQUEST, classe_eta, numero_componenti, PERL, NPERL, status_lavoratore, qualifica_lavoratore, settore, area_geografica)
-
-carcom_pfaz = distinct(carcom_pfaz)
+carcom_pfaz = carcom %>% filter(CFRED == 1) %>% select(NQUEST, classe_eta, numero_componenti, PERL, NPERL, status_lavoratore, qualifica_lavoratore, settore, area_geografica)
 
 ```
 
@@ -554,6 +557,8 @@ pfaz_qual = debiti_pfaz %>% filter(deb_res_professione > 0) %>% group_by(qualifi
 
 colori = c('lightgreen', 'lightblue', 'lightpink', 'yellow', 'darkorange', 'red', 'darkblue')
 pie(pfaz_qual$mean, labels = pfaz_qual$Qualifica, col = colori)
+
+# FARE BARPLOT
 ```
 ### SETTORE
 
@@ -581,6 +586,8 @@ ggplot(pfaz_area_geografica, aes(x = area_geografica, y = "", fill = mean)) +
   geom_tile() +
   scale_fill_gradient(low = "lightyellow", high = "darkorange") +
   scale_x_discrete(labels = etichette_aree)
+
+# BARPLOT
 ```
 ## PFCARTE
 = indica il debito su carte di credito
@@ -649,9 +656,10 @@ alld2_aimm <- read.csv("Indagine_2020/alld2_aimm.csv", sep=",")
 
 TDEBITC (mezzi di trasporto), TDEBITD (beni durevoli), TDEBITE (beni non durevoli), TDEBITF (altri acquisti o spese quotidiane), TDEBITG (spese di istruzione)
 ```{r}
-debiti20 = debiti
+<<<<<<< HEAD
 
 
+>>>>>>> 8de0d24057496f51aa12bf4efde0eb3af0cdf812
 ```
 
 ##PCONS - Distribuzione per componente
