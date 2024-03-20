@@ -90,34 +90,63 @@ carcom$ampiezza_comune = as.factor(carcom$ampiezza_comune)
 ### Debiti
 Pulizia dataset debiti
 ```{r}
-nquest_backup = debiti$NQUEST
+
+
+debiti = merge(debiti, carcom[, c("NQUEST", "PESOFIT")], by = "NQUEST", all.x = TRUE)
+
+debiti$RATADEB = debiti$RATADEB*debiti$PESOFIT
 debiti = debiti %>% rename("tot_rate_pagate" = RATADEB)
 
+
+debiti$RATAEB_RES = debiti$RATADEB_RES*debiti$PESOFIT
 debiti = debiti %>% rename("tot_rate_res" = RATADEB_RES)
 
+debiti$RATAEB_AIMM = debiti$RATADEB_AIMM*debiti$PESOFIT
 debiti = debiti %>% rename("tot_rate_altri_immobili" = RATADEB_AIMM)
 
+
+debiti$RATAEB_FAM = debiti$RATADEB_FAM*debiti$PESOFIT
 debiti = debiti %>% rename("tot_rate_fam" = RATADEB_FAM)
 
+
+debiti$RATAEB_PROF = debiti$RATADEB_PROF*debiti$PESOFIT
 debiti = debiti %>% rename("tot_rate_professione" = RATADEB_PROF)
 
 debiti = debiti %>% rename("deb_res_immobili" = PFIMM)
+
+debiti$PFCONS = debiti$PFCONS*debiti$PESOFIT
 debiti = debiti %>% rename("deb_res_beni_consumo" = PFCONS)
+
+debiti$TDEBITC = debiti$TDEBITC*debiti$PESOFIT
 debiti = debiti %>% rename("deb_res_mezzi_trasporto" = TDEBITC)
+
+debiti$TDEBITD = debiti$TDEBITD*debiti$PESOFIT
 debiti = debiti %>% rename("deb_res_beni_durevoli" = TDEBITD)
+
+debiti$TDEBITE = debiti$TDEBITE*debiti$PESOFIT
 debiti = debiti %>% rename("deb_res_beni_non_durevoli" = TDEBITE)
+
+debiti$TDEBITF = debiti$TDEBITF*debiti$PESOFIT
 debiti = debiti %>% rename("deb_res_altro" = TDEBITF)
+
+debiti$TDEBITG = debiti$TDEBITG*debiti$PESOFIT
 debiti = debiti %>% rename("deb_res_istruzione" = TDEBITG)
+
+debiti$PFAZ = debiti$PFAZ*debiti$PESOFIT
 debiti = debiti %>% rename("deb_res_professione" = PFAZ)
+
+debiti$PFCARTE = debiti$PFCARTE*debiti$PESOFIT
 debiti = debiti %>% rename("deb_carte_credito" = PFCARTE)
+
+debiti$PFCC = debiti$PFCC*debiti$PESOFIT
 debiti = debiti %>% rename("deb_scoperto_cc" = PFCC)
+
+debiti$PFCOLL = debiti$PFCOLL*debiti$PESOFIT
 debiti = debiti %>% rename("deb_garanzie_reali" = PFCOLL)
+
+debiti$PFNOCOLL = debiti$PFNOCOLL*debiti$PESOFIT
 debiti = debiti %>% rename("deb_no_garanzie_reali" = PFNOCOLL)
 
-# Peso i valori del debito per pesofit
-debiti = debiti* carcom$PESOFIT
-
-debiti$NQUEST = nquest_backup
 # Setto a 0 i dati NA
 debiti = replace(debiti, is.na(debiti), 0)
 ```
@@ -247,8 +276,8 @@ si parla sempre di debito residuo, è interessante vedere per ogni famiglia come
 con_deb = debiti_full %>% filter(tot_debito > 0)
 con_deb = con_deb %>% mutate(perc_gar_real = deb_garanzie_reali/tot_debito)
 con_deb = con_deb %>% mutate(perc_gar_non_real = 1-perc_gar_real)
+con_deb %>% filter(NQUEST == 8788)
 
-con_deb %>% select(NQUEST, perc_gar_real)
 
 ggplot(con_deb) +
   geom_histogram(aes(x = perc_gar_real))
