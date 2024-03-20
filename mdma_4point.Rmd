@@ -766,6 +766,7 @@ CLETA5 %>% reframe("Age classes" = Modalita,
                 "Average duration (years) Debts for professional activity" = Durata_Ori_pond_MUTUOIN4,
                 "Weighted Mean Tax professional activity" = Tasso_pond4
                 )
+
 ```
 #Q = status del lavoratore (1=dipendente, 2=autonomo, 3=condiz. non professionale)
 ```{r}
