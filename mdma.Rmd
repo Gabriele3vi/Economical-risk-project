@@ -155,6 +155,37 @@ debiti = replace(debiti, is.na(debiti), 0)
 ```
 
 
+
+```{r}
+debiti20 =  read.csv("Indagine_2020/debiti20.csv")
+
+
+debiti20 = merge(debiti20, carcom[, c("NQUEST", "PESOFIT")], by = "NQUEST", all.x = TRUE)
+
+debiti20$RATADEB = debiti20$RATADEB * debiti20$PESOFIT
+debiti20$RATAEB_RES = debiti20$RATADEB_RES * debiti20$PESOFIT
+debiti20$RATAEB_AIMM = debiti20$RATADEB_AIMM * debiti20$PESOFIT
+debiti20$RATAEB_FAM = debiti20$RATADEB_FAM * debiti20$PESOFIT
+debiti20$RATAEB_PROF = debiti20$RATADEB_PROF * debiti20$PESOFIT
+debiti20$PFIMM = debiti20$PFIMM * debiti20$PESOFIT
+debiti20$PFCONS = debiti20$PFCONS * debiti20$PESOFIT
+debiti20$TDEBITC = debiti20$TDEBITC * debiti20$PESOFIT
+debiti20$TDEBITD = debiti20$TDEBITD * debiti20$PESOFIT
+debiti20$TDEBITE = debiti20$TDEBITE * debiti20$PESOFIT
+debiti20$TDEBITF = debiti20$TDEBITF * debiti20$PESOFIT
+debiti20$TDEBITG = debiti20$TDEBITG * debiti20$PESOFIT
+debiti20$PFAZ = debiti20$PFAZ * debiti20$PESOFIT
+debiti20$PFCARTE = debiti20$PFCARTE * debiti20$PESOFIT
+debiti20$PFCC = debiti20$PFCC * debiti20$PESOFIT
+debiti20$PFCOLL = debiti20$PFCOLL * debiti20$PESOFIT
+debiti20$PFNOCOLL = debiti20$PFNOCOLL * debiti20$PESOFIT
+
+debiti20[is.na(debiti20)] <- 0
+
+```
+```
+
+
 ```{r}
 regions_data = read.csv("codici_regioni_prov_comuni.csv", sep=";")
 regions_data = regions_data %>% select(Codice.Regione, Denominazione.Regione, Ripartizione.geografica, Codice.Ripartizione.Geografica)
@@ -616,18 +647,19 @@ library(tidyverse)
 ```
 
 ```{r}
-carcom20 <- read.csv("~/GitHub/Economical-risk-project/Indagine_2020/carcom20.csv", sep=";")
-debiti20 <- read.csv("~/GitHub/Economical-risk-project/Indagine_2020/debiti20.csv", sep=";")
-alld2_res <- read.csv("~/GitHub/Economical-risk-project/Indagine_2020/alld2_res.csv", sep=";")
-alld2_prof <- read.csv("~/GitHub/Economical-risk-project/Indagine_2020/alld2_prof.csv", sep=";")
-alld2_fam <- read.csv("~/GitHub/Economical-risk-project/Indagine_2020/alld2_fam.csv", sep=";")
-alld2_aimm <- read.csv("~/GitHub/Economical-risk-project/Indagine_2020/alld2_aimm.csv", sep=";")
+
+alld2_res <- read.csv("Indagine_2020/alld2_res.csv", sep=",")
+alld2_prof <- read.csv("Indagine_2020/alld2_prof.csv", sep=",")
+alld2_fam <- read.csv("Indagine_2020/alld2_fam.csv", sep=",")
+alld2_aimm <- read.csv("Indagine_2020/alld2_aimm.csv", sep=",")
 ```
 
 TDEBITC (mezzi di trasporto), TDEBITD (beni durevoli), TDEBITE (beni non durevoli), TDEBITF (altri acquisti o spese quotidiane), TDEBITG (spese di istruzione)
 ```{r}
-carcom20 = carcom
-debiti20 = debiti
+<<<<<<< HEAD
+
+
+>>>>>>> 8de0d24057496f51aa12bf4efde0eb3af0cdf812
 ```
 
 ##PCONS - Distribuzione per componente
@@ -673,7 +705,7 @@ print(pie_chart)
 #ATTENZIONE QUI NO DISTINCT
 #Seleziono informazioni secondo CFCRED = 1 (capofamiglia con maggiore reddito):
 ```{r}
-carcom20 = filter(carcom20, CFRED == 1)
+carcom20 = filter(carcom, CFRED == 1)
 ```
 
 MUTUOIN3 -> media, somma (totale mutuo che viene erogato)
